@@ -4,32 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devocional Diário</title>
-    <link rel="stylesheet" href="./style.css">
-    <!-- Google Fonts -->
+    <meta name="description" content="Seu momento diário com Deus.">
+    <title>Meu Devocional</title>
+
+    <!-- FONTES -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
         rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-    <div class="app-container">
+    <!-- FUNDO -->
+    <div class="background"></div>
 
-        <!-- =========================================================
-             TELA "HOJE"
-        ========================================================== -->
-        <section id="todayScreen" class="screen active">
+    <!-- APLICAÇÃO -->
+    <main class="app">
 
-            <header class="today-header">
-                <button id="themeToggle" class="theme-toggle" type="button">🌙</button>
-                <h1>Devocional Diário</h1>
-                <button id="moreButton" class="more-button" type="button">≡</button>
+        <!-- =====================================================
+             TELA: HOJE
+        ====================================================== -->
+        <section id="homeScreen" class="screen active-screen">
+
+            <header class="header">
+                <div>
+                    <span class="small-title">SEU MOMENTO COM DEUS</span>
+                    <h1>Bom dia, <span>amigo.</span></h1>
+                </div>
+
+                <button id="themeButton" class="profile-button" aria-label="Alternar tema">☾</button>
             </header>
 
-            <div class="today-content">
+            <!-- DATA -->
+            <section class="date-section">
+                <span id="today">Carregando...</span>
+
+                <div class="streak">
+                    🔥
+                    <strong id="streak">1</strong>
+                    <span>dia</span>
+                </div>
+            </section>
+
+            <!-- VERSÍCULO -->
+            <section class="verse-card">
+                <div class="verse-top">
+                    <span class="label">PALAVRA DE HOJE</span>
+                    <button id="favoriteButton" class="favorite" aria-label="Favoritar">♡</button>
+                </div>
+
+                <div id="loading" class="loading">Carregando a Palavra...</div>
+
+                <div id="verseContent" class="hidden">
+                    <p id="verseText" class="verse-text"></p>
+                    <p id="verseReference" class="verse-reference"></p>
+                </div>
+
+                <div id="verseError" class="verse-error hidden"></div>
+
+                <button id="randomVerseButton" class="random-button">✨ Outro versículo</button>
+            </section>
+
+            <!-- =================================================
+                 DEVOCIONAL DIÁRIO (gerado por IA)
+            ================================================== -->
+            <section class="devotional-daily" id="devotionalDaily">
+
+                <span class="section-label">DEVOCIONAL DE HOJE</span>
 
                 <div id="devotionalLoading" class="devotional-loading">
                     Preparando seu devocional de hoje...
@@ -56,131 +102,247 @@
 
             </section>
 
-            <div class="today-actions">
-                <button id="openPrayerButton" class="action-button" type="button">
-                    <span class="icon">🙏</span>
-                    <span>Oração</span>
-                </button>
-                <button id="openNoteButton" class="action-button" type="button">
-                    <span class="icon">📝</span>
-                    <span>Reflexão</span>
-                </button>
-            </div>
+            <!-- ORAÇÃO -->
+            <section class="prayer-card">
+                <div class="prayer-icon">🙏</div>
+
+                <div class="prayer-content">
+                    <span class="section-label">MOMENTO DE ORAÇÃO</span>
+                    <h2>Converse com Deus</h2>
+                    <p>Separe alguns minutos para agradecer e entregar suas preocupações.</p>
+                </div>
+
+                <button id="prayerButton">Começar</button>
+            </section>
+
+            <!-- DIÁRIO -->
+            <section class="note-card">
+                <div>
+                    <span class="section-label">SEU DIÁRIO</span>
+                    <h2>Como Deus falou com você hoje?</h2>
+                </div>
+
+                <button id="noteButton" class="secondary-button">Escrever</button>
+            </section>
 
         </section>
 
-        <!-- =========================================================
-             TELA "BÍBLIA"
-        ========================================================== -->
+
+        <!-- =====================================================
+             TELA: BÍBLIA
+        ====================================================== -->
         <section id="bibleScreen" class="screen">
 
-            <header class="section-header">
-                <h1>Bíblia</h1>
-                <button id="randomVerseButton" class="icon-button" type="button">🎲</button>
-            </header>
-
-            <div class="bible-controls">
-                <select id="bookSelect" class="select-input"></select>
-                <select id="chapterSelect" class="select-input"></select>
+            <div class="page-header">
+                <div>
+                    <span class="small-title">PALAVRA DE DEUS</span>
+                    <h1>Bíblia</h1>
+                </div>
             </div>
 
-            <div id="chapterContent" class="chapter-content"></div>
+            <!-- BUSCA RÁPIDA -->
+            <div class="quick-reference">
+                <span class="section-label">IR PARA UMA PASSAGEM</span>
+
+                <div class="quick-reference-box">
+                    <input id="referenceInput" type="text" list="booksList" placeholder="Ex: João 3:16" autocomplete="off">
+                    <datalist id="booksList"></datalist>
+                    <button id="referenceButton">Ir</button>
+                </div>
+
+                <small id="referenceStatus"></small>
+            </div>
+
+            <!-- SELETOR TRADICIONAL -->
+            <div class="bible-selector">
+                <span class="selector-title">OU ESCOLHA MANUALMENTE</span>
+
+                <label>Versão</label>
+                <select id="versionSelect">
+                    <option value="nvi">NVI</option>
+                    <option value="acf">ACF</option>
+                    <option value="aa">AA</option>
+                    <option value="ntlh">NTLH</option>
+                </select>
+
+                <label>Livro</label>
+                <select id="bookSelect">
+                    <option>Carregando livros...</option>
+                </select>
+
+                <label>Capítulo</label>
+                <select id="chapterSelect">
+                    <option>Escolha um livro</option>
+                </select>
+
+                <button id="readChapterButton" class="primary-button">Ler capítulo</button>
+            </div>
+
+            <!-- CAPÍTULO -->
+            <article id="chapterContent" class="chapter-content">
+                <div class="empty-state">
+                    <span>📖</span>
+                    <h2>Escolha um capítulo</h2>
+                    <p>Selecione um livro e capítulo para começar sua leitura.</p>
+                </div>
+            </article>
 
         </section>
 
-        <!-- =========================================================
-             TELA "BUSCAR"
-        ========================================================== -->
+
+        <!-- =====================================================
+             TELA: BUSCA
+        ====================================================== -->
         <section id="searchScreen" class="screen">
 
-            <header class="section-header">
+            <div class="page-header">
+                <span class="small-title">ENCONTRE NA BÍBLIA</span>
                 <h1>Buscar</h1>
-            </header>
-
-            <div class="search-container">
-                <input id="searchInput" class="search-input" type="text" placeholder="Digite sua busca...">
-                <button id="searchButton" class="primary-button" type="button">Buscar</button>
             </div>
 
-            <div id="searchResults" class="search-results"></div>
+            <form id="searchForm" class="search-box">
+                <input id="searchInput" type="search" placeholder="Ex: amor, fé, esperança..." autocomplete="off">
+                <button type="submit">🔎</button>
+            </form>
+
+            <div id="searchStatus" class="search-status"></div>
+
+            <div id="searchResults" class="search-results">
+                <div class="empty-state">
+                    <span>🔎</span>
+                    <h2>Pesquise uma palavra</h2>
+                    <p>Encontre versículos relacionados ao que está no seu coração.</p>
+                </div>
+            </div>
 
         </section>
 
-        <!-- =========================================================
-             TELA "CAMINHO" (Path / Journey)
-        ========================================================== -->
+
+        <!-- =====================================================
+             TELA: CAMINHO
+        ====================================================== -->
         <section id="pathScreen" class="screen">
 
-            <header class="section-header">
-                <h1>Meu Caminho</h1>
-            </header>
-
-            <div class="path-tabs">
-                <button id="favoritesTabButton" class="tab-button active" data-tab="favorites"
-                    type="button">Favoritos</button>
-                <button id="reflectionsTabButton" class="tab-button" data-tab="reflections"
-                    type="button">Reflexões</button>
+            <div class="page-header">
+                <span class="small-title">SEU CAMINHO</span>
+                <h1>Caminho</h1>
             </div>
 
-            <div id="favoritesTab" class="tab-content active">
-                <div id="favoritesList" class="verses-list"></div>
+            <!-- NAVEGAÇÃO DO CAMINHO -->
+            <div class="paths-navigation">
+                <button class="paths-tab active" data-path="savedVerses" type="button">
+                    🔖
+                    <span>Versículos salvos</span>
+                </button>
+
+                <button class="paths-tab" data-path="reflections" type="button">
+                    📝
+                    <span>Reflexões feitas</span>
+                </button>
             </div>
 
-            <div id="reflectionsTab" class="tab-content">
+            <!-- VERSÍCULOS SALVOS -->
+            <div id="savedVerses" class="path-content active-path">
+                <div id="favoritesList" class="favorites-list"></div>
+            </div>
+
+            <!-- REFLEXÕES -->
+            <div id="reflections" class="path-content">
                 <div id="reflectionsList" class="reflections-list"></div>
             </div>
 
         </section>
 
-        <!-- =========================================================
-             TELA "MAIS"
-        ========================================================== -->
+
+        <!-- =====================================================
+             TELA: MAIS
+        ====================================================== -->
         <section id="moreScreen" class="screen">
 
-            <header class="section-header">
+            <div class="page-header">
+                <span class="small-title">CONFIGURAÇÕES</span>
                 <h1>Mais</h1>
-            </header>
+            </div>
 
-            <div class="more-options">
-                <button id="aboutButton" class="more-option-button" type="button">
-                    <span class="icon">ℹ️</span>
-                    <span>Sobre</span>
+            <!-- ESTATÍSTICAS -->
+            <div class="stats-card">
+                <span class="stats-icon">🔥</span>
+
+                <div>
+                    <strong id="statsStreak">1</strong>
+                    <span>dias de sequência</span>
+                </div>
+            </div>
+
+            <!-- MENU -->
+            <div class="menu-card">
+
+                <button id="morePrayerButton" class="menu-button" type="button">
+                    <span>🙏</span>
+                    <div>
+                        <strong>Momento de oração</strong>
+                        <small>Separe um momento com Deus</small>
+                    </div>
+                    <b>›</b>
                 </button>
-                <button id="clearDataButton" class="more-option-button danger" type="button">
-                    <span class="icon">🗑️</span>
-                    <span>Limpar dados</span>
+
+                <button id="moreNoteButton" class="menu-button" type="button">
+                    <span>📝</span>
+                    <div>
+                        <strong>Meu diário</strong>
+                        <small>Escreva uma nova reflexão</small>
+                    </div>
+                    <b>›</b>
                 </button>
+
+                <button id="clearDataButton" class="menu-button danger" type="button">
+                    <span>🗑️</span>
+                    <div>
+                        <strong>Limpar dados</strong>
+                        <small>Apagar favoritos e reflexões</small>
+                    </div>
+                    <b>›</b>
+                </button>
+
             </div>
 
         </section>
 
-        <!-- =========================================================
-             NAVEGAÇÃO INFERIOR
-        ========================================================== -->
-        <nav class="bottom-nav">
-            <button class="nav-button active" data-screen="todayScreen" type="button">
-                <span class="icon">📖</span>
-                <span>Hoje</span>
-            </button>
-            <button class="nav-button" data-screen="bibleScreen" type="button">
-                <span class="icon">✝️</span>
-                <span>Bíblia</span>
-            </button>
-            <button class="nav-button" data-screen="searchScreen" type="button">
-                <span class="icon">🔍</span>
-                <span>Buscar</span>
-            </button>
-            <button class="nav-button" data-screen="pathScreen" type="button">
-                <span class="icon">🛤️</span>
-                <span>Caminho</span>
-            </button>
-            <button class="nav-button" data-screen="moreScreen" type="button">
-                <span class="icon">⋯</span>
-                <span>Mais</span>
-            </button>
-        </nav>
+    </main>
 
-    </div>
+
+    <!-- =========================================================
+         NAVEGAÇÃO
+    ========================================================== -->
+    <nav class="navigation">
+
+        <button class="nav-item active" data-screen="homeScreen" type="button">
+            <span>⌂</span>
+            <small>Hoje</small>
+        </button>
+
+        <button class="nav-item" data-screen="bibleScreen" type="button">
+            <span>📖</span>
+            <small>Bíblia</small>
+        </button>
+
+        <button class="nav-item" data-screen="searchScreen" type="button">
+            <span>🔎</span>
+            <small>Buscar</small>
+        </button>
+
+        <button class="nav-item" data-screen="pathScreen" type="button">
+            <span>♡</span>
+            <small>Caminho</small>
+        </button>
+
+        <button class="nav-item" data-screen="moreScreen" type="button">
+            <span>☰</span>
+            <small>Mais</small>
+        </button>
+
+    </nav>
+
 
     <!-- =========================================================
          MODAL DE ORAÇÃO
@@ -189,18 +351,17 @@
         <div class="modal-content">
             <button id="closePrayerModal" class="close" type="button">×</button>
 
-            <span class="section-label">ORAÇÃO DO DIA</span>
-            <h2>Como posso orar hoje?</h2>
+            <span class="section-label">MOMENTO DE ORAÇÃO</span>
+            <h2>Senhor, aquieta meu coração.</h2>
 
-            <textarea id="prayerInput" placeholder="Escreva sua oração..."></textarea>
+            <p>Obrigado por este novo dia. Obrigado pela Tua presença e pelo Teu cuidado.</p>
+            <p>Entrego a Ti minhas preocupações, meus planos e tudo aquilo que pesa sobre meu coração.</p>
+            <p>Dá-me sabedoria para viver este dia, fé para confiar em Ti e um coração disposto a seguir a Tua vontade.</p>
 
-            <button id="savePrayerButton" class="primary-button" type="button">Enviar oração</button>
-
-            <div class="prayer-footer">
-                <strong>Amém. 🤍</strong>
-            </div>
+            <strong>Amém. 🤍</strong>
         </div>
     </div>
+
 
     <!-- =========================================================
          MODAL DE ANOTAÇÃO
@@ -217,6 +378,7 @@
             <button id="saveNoteButton" class="primary-button" type="button">Salvar reflexão</button>
         </div>
     </div>
+
 
     <!-- JAVASCRIPT -->
     <script src="./script.js"></script>
