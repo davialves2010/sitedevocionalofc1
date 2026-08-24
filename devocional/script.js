@@ -1,98 +1,303 @@
-// =========================================================
-//   INICIALIZAÇÃO E CONFIGURAÇÃO
-// =========================================================
+/* =========================================================
+   CONFIGURAÇÃO
+========================================================= */
 
-const API_BASE = "https://abibliadigital.api.br/api";
-const API_VERSION = "nvi";
+const API_URL = "https://abibliadigital.api.br/api";
 
-let currentBook = null;
-let currentChapter = null;
+let currentVersion = "nvi";
 
-// Elementos DOM
-const screens = document.querySelectorAll(".screen");
-const navButtons = document.querySelectorAll(".nav-button");
-const themeToggle = document.getElementById("themeToggle");
-const moreButton = document.getElementById("moreButton");
-const todayScreen = document.getElementById("todayScreen");
-const prayerModal = document.getElementById("prayerModal");
-const noteModal = document.getElementById("noteModal");
-const closePrayerModal = document.getElementById("closePrayerModal");
-const closeNoteModal = document.getElementById("closeNoteModal");
-const openPrayerButton = document.getElementById("openPrayerButton");
-const openNoteButton = document.getElementById("openNoteButton");
-const savePrayerButton = document.getElementById("savePrayerButton");
-const saveNoteButton = document.getElementById("saveNoteButton");
-const prayerInput = document.getElementById("prayerInput");
-const noteInput = document.getElementById("noteInput");
-const devotionalContent = document.getElementById("devotionalContent");
-const devotionalError = document.getElementById("devotionalError");
-const devotionalLoading = document.getElementById("devotionalLoading");
-const devotionalQuote = document.getElementById("devotionalQuote");
-const devotionalVerseText = document.getElementById("devotionalVerseText");
-const devotionalVerseRef = document.getElementById("devotionalVerseRef");
-const devotionalTitle = document.getElementById("devotionalTitle");
-const devotionalParagraphs = document.getElementById("devotionalParagraphs");
+let currentVerse = {
+    book: "sl",
+    chapter: 23,
+    verse: 1
+};
 
-// =========================================================
-//   TEMA (LIGHT/DARK)
-// =========================================================
 
-function initializeTheme() {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    applyTheme(savedTheme);
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const $ = (id) => document.getElementById(id);
+
+/* HOME */
+const today = $("today");
+const streak = $("streak");
+const statsStreak = $("statsStreak");
+const verseText = $("verseText");
+const verseReference = $("verseReference");
+const loading = $("loading");
+const verseContent = $("verseContent");
+const verseError = $("verseError");
+const favoriteButton = $("favoriteButton");
+const randomVerseButton = $("randomVerseButton");
+
+/* DEVOCIONAL DIÁRIO */
+const devotionalLoading = $("devotionalLoading");
+const devotionalContent = $("devotionalContent");
+const devotionalError = $("devotionalError");
+const devotionalQuote = $("devotionalQuote");
+const devotionalVerseText = $("devotionalVerseText");
+const devotionalVerseRef = $("devotionalVerseRef");
+const devotionalTitle = $("devotionalTitle");
+const devotionalParagraphs = $("devotionalParagraphs");
+
+/* BÍBLIA */
+const versionSelect = $("versionSelect");
+const bookSelect = $("bookSelect");
+const chapterSelect = $("chapterSelect");
+const readChapterButton = $("readChapterButton");
+const chapterContent = $("chapterContent");
+
+/* BUSCA */
+const searchForm = $("searchForm");
+const searchInput = $("searchInput");
+const searchStatus = $("searchStatus");
+const searchResults = $("searchResults");
+
+/* FAVORITOS */
+const favoritesList = $("favoritesList");
+
+/* REFLEXÕES */
+const reflectionsList = $("reflectionsList");
+
+/* MODAIS */
+const prayerModal = $("prayerModal");
+const noteModal = $("noteModal");
+const noteInput = $("noteInput");
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const STORAGE = {
+    favorites: "devocional_favorites",
+    streak: "devocional_streak",
+    theme: "devocional_theme",
+    reflections: "devocional_reflections"
+};
+
+
+/* =========================================================
+   FAVORITOS
+========================================================= */
+
+function getFavorites() {
+    return JSON.parse(localStorage.getItem(STORAGE.favorites) || "[]");
 }
 
-function applyTheme(theme) {
-    document.body.classList.toggle("dark-theme", theme === "dark");
-    localStorage.setItem("theme", theme);
-    updateThemeIcon();
+function saveFavorites(favorites) {
+    localStorage.setItem(STORAGE.favorites, JSON.stringify(favorites));
 }
 
-function updateThemeIcon() {
-    const isDark = document.body.classList.contains("dark-theme");
-    themeToggle.textContent = isDark ? "☀️" : "🌙";
+
+/* =========================================================
+   REFLEXÕES
+========================================================= */
+
+function getReflections() {
+    return JSON.parse(localStorage.getItem(STORAGE.reflections) || "[]");
 }
 
-themeToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.contains("dark-theme");
-    applyTheme(isDark ? "light" : "dark");
-});
+function saveReflections(reflections) {
+    localStorage.setItem(STORAGE.reflections, JSON.stringify(reflections));
+}
 
-// =========================================================
-//   NAVEGAÇÃO
-// =========================================================
 
-navButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        const screenId = button.dataset.screen;
-        switchScreen(screenId);
-        updateActiveNavButton(button);
+/* =========================================================
+   DATA
+========================================================= */
+
+function showDate() {
+    const date = new Date();
+    today.textContent = date.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
     });
-});
+}
 
-function switchScreen(screenId) {
-    screens.forEach(screen => screen.classList.remove("active"));
-    const newScreen = document.getElementById(screenId);
-    if (newScreen) {
-        newScreen.classList.add("active");
+showDate();
+
+
+/* =========================================================
+   STREAK
+========================================================= */
+
+function loadStreak() {
+    let value = Number(localStorage.getItem(STORAGE.streak));
+
+    if (!value) {
+        value = 1;
+        localStorage.setItem(STORAGE.streak, value);
+    }
+
+    streak.textContent = value;
+    statsStreak.textContent = value;
+}
+
+loadStreak();
+
+
+/* =========================================================
+   API DA BÍBLIA
+========================================================= */
+
+async function apiGet(endpoint) {
+    const response = await fetch(`${API_URL}${endpoint}`);
+
+    if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
+
+
+/* =========================================================
+   VERSÍCULO
+========================================================= */
+
+async function loadVerse(
+    book = currentVerse.book,
+    chapter = currentVerse.chapter,
+    verse = currentVerse.verse
+) {
+    loading.classList.remove("hidden");
+    verseContent.classList.add("hidden");
+    verseError.classList.add("hidden");
+
+    try {
+        const data = await apiGet(`/verses/${currentVersion}/${book}/${chapter}/${verse}`);
+
+        currentVerse = { book, chapter, verse };
+
+        verseText.textContent = `"${data.text}"`;
+        verseReference.textContent = `${data.book.name} ${data.chapter}:${data.number}`;
+
+        loading.classList.add("hidden");
+        verseContent.classList.remove("hidden");
+
+        updateFavoriteButton();
+
+    } catch (error) {
+        console.error(error);
+
+        loading.classList.add("hidden");
+
+        verseError.textContent =
+            "Não foi possível carregar o versículo. Verifique sua conexão ou tente novamente.";
+
+        verseError.classList.remove("hidden");
     }
 }
 
-function updateActiveNavButton(button) {
-    navButtons.forEach(btn => btn.classList.remove("active"));
-    button.classList.add("active");
+
+/* =========================================================
+   VERSÍCULO ALEATÓRIO
+========================================================= */
+
+async function loadRandomVerse() {
+    loading.classList.remove("hidden");
+    verseContent.classList.add("hidden");
+    verseError.classList.add("hidden");
+
+    try {
+        const data = await apiGet(`/verses/${currentVersion}/random`);
+
+        currentVerse = {
+            book: data.book.abbrev.pt,
+            chapter: data.chapter,
+            verse: data.number
+        };
+
+        verseText.textContent = `"${data.text}"`;
+        verseReference.textContent = `${data.book.name} ${data.chapter}:${data.number}`;
+
+        loading.classList.add("hidden");
+        verseContent.classList.remove("hidden");
+
+        updateFavoriteButton();
+
+    } catch (error) {
+        console.error(error);
+
+        loading.classList.add("hidden");
+
+        verseError.textContent = "Não foi possível obter um versículo aleatório.";
+        verseError.classList.remove("hidden");
+    }
 }
 
-// "Mais" button abre a tela "Mais"
-moreButton.addEventListener("click", () => {
-    switchScreen("moreScreen");
-    const moreButton = Array.from(navButtons).find(b => b.dataset.screen === "moreScreen");
-    if (moreButton) updateActiveNavButton(moreButton);
+randomVerseButton.addEventListener("click", loadRandomVerse);
+
+
+/* =========================================================
+   ID DO VERSÍCULO
+========================================================= */
+
+function verseId(verse = currentVerse) {
+    return [currentVersion, verse.book, verse.chapter, verse.verse].join("-");
+}
+
+
+/* =========================================================
+   FAVORITO ATUAL
+========================================================= */
+
+function isFavorite() {
+    const favorites = getFavorites();
+    return favorites.some(item => item.id === verseId());
+}
+
+function updateFavoriteButton() {
+    if (isFavorite()) {
+        favoriteButton.textContent = "♥";
+        favoriteButton.classList.add("saved");
+    } else {
+        favoriteButton.textContent = "♡";
+        favoriteButton.classList.remove("saved");
+    }
+}
+
+
+/* =========================================================
+   FAVORITAR VERSÍCULO
+========================================================= */
+
+favoriteButton.addEventListener("click", () => {
+    const favorites = getFavorites();
+    const id = verseId();
+
+    if (favorites.some(item => item.id === id)) {
+
+        const updated = favorites.filter(item => item.id !== id);
+        saveFavorites(updated);
+
+    } else {
+
+        favorites.push({
+            id,
+            version: currentVersion,
+            book: currentVerse.book,
+            chapter: currentVerse.chapter,
+            verse: currentVerse.verse,
+            reference: verseReference.textContent,
+            text: verseText.textContent,
+            savedAt: new Date().toISOString()
+        });
+
+        saveFavorites(favorites);
+    }
+
+    updateFavoriteButton();
+    renderFavorites();
 });
 
-// =========================================================
-//   DEVOCIONAL DIÁRIO
-// =========================================================
+
+/* =========================================================
+   DEVOCIONAL DIÁRIO (gerado por IA)
+========================================================= */
 
 function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -160,476 +365,585 @@ async function loadDevotional() {
    LIVROS
 ========================================================= */
 
-const bookMapping = {
-    "gn": "Gênesis",
-    "ex": "Êxodo",
-    "lv": "Levítico",
-    "nm": "Números",
-    "dt": "Deuteronômio",
-    "js": "Josué",
-    "jz": "Juízes",
-    "rt": "Rute",
-    "1sm": "1 Samuel",
-    "2sm": "2 Samuel",
-    "1rs": "1 Reis",
-    "2rs": "2 Reis",
-    "1cr": "1 Crônicas",
-    "2cr": "2 Crônicas",
-    "ed": "Esdras",
-    "ne": "Neemias",
-    "et": "Ester",
-    "jó": "Jó",
-    "sl": "Salmos",
-    "pv": "Provérbios",
-    "ec": "Eclesiastes",
-    "ct": "Cânticos",
-    "is": "Isaías",
-    "jr": "Jeremias",
-    "lm": "Lamentações",
-    "ez": "Ezequiel",
-    "dn": "Daniel",
-    "os": "Oséias",
-    "jl": "Joel",
-    "am": "Amós",
-    "ob": "Obadias",
-    "jn": "Jonas",
-    "mq": "Miquéias",
-    "na": "Naum",
-    "hc": "Habacuque",
-    "sf": "Sofonias",
-    "ag": "Ageu",
-    "zc": "Zacarias",
-    "ml": "Malaquias",
-    "mt": "Mateus",
-    "mc": "Marcos",
-    "lc": "Lucas",
-    "jo": "João",
-    "at": "Atos",
-    "rm": "Romanos",
-    "1co": "1 Coríntios",
-    "2co": "2 Coríntios",
-    "gl": "Gálatas",
-    "ef": "Efésios",
-    "fp": "Filipenses",
-    "cl": "Colossenses",
-    "1ts": "1 Tessalonicenses",
-    "2ts": "2 Tessalonicenses",
-    "1tm": "1 Timóteo",
-    "2tm": "2 Timóteo",
-    "tt": "Tito",
-    "fm": "Filemom",
-    "hb": "Hebreus",
-    "tg": "Tiago",
-    "1pd": "1 Pedro",
-    "2pd": "2 Pedro",
-    "1jo": "1 João",
-    "2jo": "2 João",
-    "3jo": "3 João",
-    "jd": "Judas",
-    "ap": "Apocalipse"
-};
-
 async function loadBooks() {
-    try {
-        const response = await fetch(`${API_BASE}/books/${API_VERSION}`);
-        const books = await response.json();
+    bookSelect.innerHTML = `<option>Carregando...</option>`;
 
-        const bookSelect = document.getElementById("bookSelect");
+    try {
+        const books = await apiGet("/books");
+
         bookSelect.innerHTML = "";
 
         books.forEach(book => {
             const option = document.createElement("option");
             option.value = book.abbrev.pt;
             option.textContent = book.name;
+            option.dataset.chapters = book.chapters;
             bookSelect.appendChild(option);
         });
 
-        // Load first book's chapters by default
-        if (books.length > 0) {
-            currentBook = books[0].abbrev.pt;
-            loadChapters(currentBook);
-        }
+        bookSelect.value = "sl";
 
-        bookSelect.addEventListener("change", (e) => {
-            currentBook = e.target.value;
-            loadChapters(currentBook);
-        });
+        loadChapters();
 
     } catch (error) {
-        console.error("Erro ao carregar livros:", error);
+        console.error(error);
+
+        bookSelect.innerHTML = `<option>Não foi possível carregar os livros</option>`;
     }
 }
 
-async function loadChapters(bookAbbrev) {
-    try {
-        const response = await fetch(`${API_BASE}/books/${API_VERSION}/${bookAbbrev}`);
-        const book = await response.json();
 
-        const chapterSelect = document.getElementById("chapterSelect");
-        chapterSelect.innerHTML = "";
+/* =========================================================
+   CAPÍTULOS
+========================================================= */
 
-        for (let i = 1; i <= book.chapters; i++) {
-            const option = document.createElement("option");
-            option.value = i;
-            option.textContent = `Capítulo ${i}`;
-            chapterSelect.appendChild(option);
-        }
+function loadChapters() {
+    const selected = bookSelect.options[bookSelect.selectedIndex];
 
-        // Load first chapter by default
-        currentChapter = 1;
-        loadChapter(currentBook, 1);
+    if (!selected) return;
 
-        chapterSelect.addEventListener("change", (e) => {
-            currentChapter = parseInt(e.target.value);
-            loadChapter(currentBook, currentChapter);
-        });
+    const chapters = Number(selected.dataset.chapters);
 
-    } catch (error) {
-        console.error("Erro ao carregar capítulos:", error);
+    chapterSelect.innerHTML = "";
+
+    for (let i = 1; i <= chapters; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = `Capítulo ${i}`;
+        chapterSelect.appendChild(option);
     }
 }
 
-async function loadChapter(bookAbbrev, chapterNum) {
-    try {
-        const response = await fetch(`${API_BASE}/verses/${API_VERSION}/${bookAbbrev}/${chapterNum}`);
-        const verses = await response.json();
+bookSelect.addEventListener("change", loadChapters);
 
-        const chapterContent = document.getElementById("chapterContent");
+
+/* =========================================================
+   LER CAPÍTULO
+========================================================= */
+
+async function loadChapter() {
+    const book = bookSelect.value;
+    const chapter = chapterSelect.value;
+
+    chapterContent.innerHTML = `<div class="loading">Carregando capítulo...</div>`;
+
+    try {
+        const data = await apiGet(`/verses/${currentVersion}/${book}/${chapter}`);
+
         chapterContent.innerHTML = "";
 
-        verses.forEach(verse => {
-            const verseDiv = document.createElement("div");
-            verseDiv.className = "verse-item";
+        const title = document.createElement("h2");
+        title.className = "chapter-title";
+        title.textContent = `${data.book.name} ${data.chapter.number}`;
+        chapterContent.appendChild(title);
 
-            const verseText = document.createElement("p");
-            verseText.innerHTML = `<strong class="verse-number">${verse.number}</strong><span class="verse-text">${verse.text}</span>`;
+        data.verses.forEach(verse => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "bible-verse";
 
-            const verseActions = document.createElement("div");
-            verseActions.className = "verse-actions";
+            const number = document.createElement("span");
+            number.className = "verse-number";
+            number.textContent = verse.number;
 
-            const favoriteButton = document.createElement("button");
-            favoriteButton.className = "verse-action-button";
-            favoriteButton.textContent = "⭐ Favoritar";
-            favoriteButton.addEventListener("click", () => {
-                addFavorite(verses[0].book.abbrev, verses[0].book.name, verses[0].chapter, verse.number, verse.text);
+            const content = document.createElement("div");
+            content.className = "verse-reading";
+
+            const text = document.createElement("div");
+            text.textContent = verse.text;
+
+            const actions = document.createElement("div");
+            actions.className = "verse-actions";
+
+            const saveButton = document.createElement("button");
+            saveButton.className = "small-action";
+            saveButton.textContent = "♡ Salvar";
+
+            saveButton.addEventListener("click", () => {
+                saveVerseFromChapter(data, verse);
+                saveButton.textContent = "♥ Salvo";
             });
 
-            verseActions.appendChild(favoriteButton);
-            verseDiv.appendChild(verseText);
-            verseDiv.appendChild(verseActions);
-            chapterContent.appendChild(verseDiv);
+            actions.appendChild(saveButton);
+
+            content.appendChild(text);
+            content.appendChild(actions);
+
+            wrapper.appendChild(number);
+            wrapper.appendChild(content);
+
+            chapterContent.appendChild(wrapper);
         });
 
     } catch (error) {
-        console.error("Erro ao carregar capítulo:", error);
+        console.error(error);
+
+        chapterContent.innerHTML = `
+            <div class="empty-state">
+                <span>⚠️</span>
+                <h2>Não foi possível carregar</h2>
+                <p>Tente novamente em alguns instantes.</p>
+            </div>
+        `;
     }
 }
 
-// Random verse
-document.getElementById("randomVerseButton").addEventListener("click", async () => {
-    try {
-        const bookAbbrev = currentBook;
-        const response = await fetch(`${API_BASE}/books/${API_VERSION}/${bookAbbrev}`);
-        const book = await response.json();
+readChapterButton.addEventListener("click", loadChapter);
 
-        const randomChapter = Math.floor(Math.random() * book.chapters) + 1;
 
-        const chapterSelect = document.getElementById("chapterSelect");
-        chapterSelect.value = randomChapter;
-        currentChapter = randomChapter;
-        loadChapter(bookAbbrev, randomChapter);
+/* =========================================================
+   SALVAR VERSÍCULO DO CAPÍTULO
+========================================================= */
 
-    } catch (error) {
-        console.error("Erro ao carregar versículo aleatório:", error);
-    }
+function saveVerseFromChapter(data, verse) {
+    const favorites = getFavorites();
+
+    const book = data.book.abbrev.pt;
+
+    const id = [currentVersion, book, data.chapter.number, verse.number].join("-");
+
+    if (favorites.some(item => item.id === id)) return;
+
+    favorites.push({
+        id,
+        version: currentVersion,
+        book,
+        chapter: data.chapter.number,
+        verse: verse.number,
+        reference: `${data.book.name} ${data.chapter.number}:${verse.number}`,
+        text: `"${verse.text}"`,
+        savedAt: new Date().toISOString()
+    });
+
+    saveFavorites(favorites);
+    renderFavorites();
+}
+
+
+/* =========================================================
+   VERSÃO
+========================================================= */
+
+versionSelect.addEventListener("change", () => {
+    currentVersion = versionSelect.value;
+    loadVerse();
 });
 
-// =========================================================
-//   BUSCA
-// =========================================================
 
-document.getElementById("searchButton").addEventListener("click", async () => {
-    const query = document.getElementById("searchInput").value.trim();
+/* =========================================================
+   BUSCA
+========================================================= */
 
-    if (!query) {
-        alert("Por favor, digite algo para buscar.");
+searchForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const term = searchInput.value.trim();
+
+    if (!term) {
+        searchStatus.textContent = "Digite uma palavra para pesquisar.";
         return;
     }
 
+    searchStatus.textContent = "Pesquisando...";
+    searchResults.innerHTML = "";
+
     try {
-        const response = await fetch(`${API_BASE}/search`, {
+        const response = await fetch(`${API_URL}/verses/search`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             },
             body: JSON.stringify({
-                query: query,
-                version: API_VERSION
+                version: currentVersion,
+                search: term
             })
         });
 
-        const results = await response.json();
+        if (!response.ok) {
+            throw new Error(`Erro HTTP ${response.status}`);
+        }
 
-        const searchResults = document.getElementById("searchResults");
-        searchResults.innerHTML = "";
+        const data = await response.json();
 
-        if (results.length === 0) {
-            searchResults.innerHTML = "<p>Nenhum resultado encontrado.</p>";
+        searchStatus.textContent =
+            `${data.occurrence || data.verses.length} resultado(s) encontrado(s).`;
+
+        if (!data.verses || !data.verses.length) {
+            searchResults.innerHTML = `
+                <div class="empty-state">
+                    <span>🔎</span>
+                    <h2>Nada encontrado</h2>
+                    <p>Tente outra palavra.</p>
+                </div>
+            `;
             return;
         }
 
-        results.forEach(result => {
-            const resultDiv = document.createElement("div");
-            resultDiv.className = "search-result-item";
-            resultDiv.innerHTML = `
-                <p class="search-result-reference">${result.book.name} ${result.chapter}:${result.number}</p>
-                <p class="search-result-text">${result.text}</p>
-            `;
-            searchResults.appendChild(resultDiv);
+        data.verses.slice(0, 50).forEach(verse => {
+            const item = document.createElement("article");
+            item.className = "search-result";
+
+            const strong = document.createElement("strong");
+            strong.textContent = `${verse.book.name} ${verse.chapter}:${verse.number}`;
+
+            const p = document.createElement("p");
+            p.textContent = verse.text;
+
+            item.appendChild(strong);
+            item.appendChild(p);
+
+            searchResults.appendChild(item);
         });
 
     } catch (error) {
-        console.error("Erro na busca:", error);
+        console.error(error);
+        searchStatus.textContent = "Não foi possível realizar a busca.";
     }
 });
 
-// =========================================================
-//   FAVORITOS
-// =========================================================
 
-function addFavorite(bookAbbrev, bookName, chapter, verse, text) {
-    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    const newFavorite = {
-        bookAbbrev,
-        bookName,
-        chapter,
-        verse,
-        text,
-        addedAt: new Date().toISOString()
-    };
-
-    const exists = favorites.some(
-        fav => fav.bookAbbrev === bookAbbrev && fav.chapter === chapter && fav.verse === verse
-    );
-
-    if (!exists) {
-        favorites.push(newFavorite);
-        localStorage.setItem("favorites", JSON.stringify(favorites));
-        renderFavorites();
-        alert("Versículo adicionado aos favoritos!");
-    } else {
-        alert("Este versículo já está nos favoritos.");
-    }
-}
+/* =========================================================
+   RENDERIZAR FAVORITOS
+========================================================= */
 
 function renderFavorites() {
-    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    const favoritesList = document.getElementById("favoritesList");
+    const favorites = getFavorites();
 
     favoritesList.innerHTML = "";
 
-    if (favorites.length === 0) {
-        favoritesList.innerHTML = "<p>Você ainda não tem favoritos.</p>";
+    if (!favorites.length) {
+        favoritesList.innerHTML = `
+            <div class="empty-state">
+                <span>♡</span>
+                <h2>Nenhum versículo salvo</h2>
+                <p>Toque no coração de um versículo para salvá-lo.</p>
+            </div>
+        `;
         return;
     }
 
-    favorites.forEach((fav, index) => {
-        const verseDiv = document.createElement("div");
-        verseDiv.className = "verse-item";
+    favorites.slice().reverse().forEach(favorite => {
+        const item = document.createElement("article");
+        item.className = "favorite-item";
 
-        const verseText = document.createElement("p");
-        verseText.innerHTML = `<strong class="verse-number">${fav.bookName} ${fav.chapter}:${fav.verse}</strong><span class="verse-text">${fav.text}</span>`;
+        const reference = document.createElement("span");
+        reference.className = "reference";
+        reference.textContent = favorite.reference;
 
-        const removeButton = document.createElement("button");
-        removeButton.className = "verse-action-button";
-        removeButton.textContent = "🗑️ Remover";
-        removeButton.addEventListener("click", () => {
-            favorites.splice(index, 1);
-            localStorage.setItem("favorites", JSON.stringify(favorites));
-            renderFavorites();
+        const text = document.createElement("p");
+        text.textContent = favorite.text;
+
+        const remove = document.createElement("button");
+        remove.className = "remove-favorite";
+        remove.textContent = "Remover";
+
+        remove.addEventListener("click", () => {
+            removeFavorite(favorite.id);
         });
 
-        const verseActions = document.createElement("div");
-        verseActions.className = "verse-actions";
-        verseActions.appendChild(removeButton);
+        item.appendChild(reference);
+        item.appendChild(text);
+        item.appendChild(remove);
 
-        verseDiv.appendChild(verseText);
-        verseDiv.appendChild(verseActions);
-        favoritesList.appendChild(verseDiv);
+        favoritesList.appendChild(item);
     });
 }
 
-// =========================================================
-//   REFLEXÕES / DIÁRIO
-// =========================================================
+
+/* =========================================================
+   REMOVER FAVORITO
+========================================================= */
+
+function removeFavorite(id) {
+    const favorites = getFavorites();
+
+    saveFavorites(favorites.filter(item => item.id !== id));
+
+    renderFavorites();
+    updateFavoriteButton();
+}
+
+
+/* =========================================================
+   NAVEGAÇÃO PRINCIPAL
+========================================================= */
+
+const navItems = document.querySelectorAll(".nav-item");
+const screens = document.querySelectorAll(".screen");
+
+navItems.forEach(button => {
+    button.addEventListener("click", () => {
+        const screenId = button.dataset.screen;
+
+        navItems.forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+
+        screens.forEach(screen => {
+            screen.classList.remove("active-screen");
+        });
+
+        $(screenId).classList.add("active-screen");
+
+        if (screenId === "favoritesScreen") {
+            renderFavorites();
+        }
+
+        if (screenId === "moreScreen") {
+            renderFavorites();
+            renderReflections();
+        }
+    });
+});
+
+
+/* =========================================================
+   NAVEGAÇÃO DENTRO DE CAMINHOS
+========================================================= */
+
+const pathTabs = document.querySelectorAll(".paths-tab");
+const pathContents = document.querySelectorAll(".path-content");
+
+pathTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+        const target = tab.dataset.path;
+
+        pathTabs.forEach(item => item.classList.remove("active"));
+        pathContents.forEach(content => content.classList.remove("active-path"));
+
+        tab.classList.add("active");
+
+        const targetElement = document.getElementById(target);
+
+        if (targetElement) {
+            targetElement.classList.add("active-path");
+        }
+
+        if (target === "savedVerses") {
+            renderFavorites();
+        }
+
+        if (target === "reflections") {
+            renderReflections();
+        }
+    });
+});
+
+
+/* =========================================================
+   ORAÇÃO
+========================================================= */
+
+function openPrayer() {
+    prayerModal.classList.remove("hidden");
+}
+
+function closePrayer() {
+    prayerModal.classList.add("hidden");
+}
+
+$("prayerButton").addEventListener("click", openPrayer);
+$("morePrayerButton").addEventListener("click", openPrayer);
+$("closePrayerModal").addEventListener("click", closePrayer);
+
+prayerModal.addEventListener("click", event => {
+    if (event.target === prayerModal) {
+        closePrayer();
+    }
+});
+
+
+/* =========================================================
+   DIÁRIO
+========================================================= */
+
+function openNote() {
+    noteInput.value = "";
+    noteModal.classList.remove("hidden");
+}
+
+function closeNote() {
+    noteModal.classList.add("hidden");
+}
+
+$("noteButton").addEventListener("click", openNote);
+$("moreNoteButton").addEventListener("click", openNote);
+$("closeNoteModal").addEventListener("click", closeNote);
+
+
+/* =========================================================
+   SALVAR REFLEXÃO
+========================================================= */
+
+$("saveNoteButton").addEventListener("click", () => {
+    const text = noteInput.value.trim();
+
+    if (!text) {
+        alert("Escreva alguma coisa antes de salvar sua reflexão.");
+        return;
+    }
+
+    const reflections = getReflections();
+    const now = new Date();
+
+    const reflection = {
+        id: Date.now(),
+        text,
+        createdAt: now.toISOString()
+    };
+
+    reflections.push(reflection);
+    saveReflections(reflections);
+
+    closeNote();
+    renderReflections();
+
+    alert("Sua reflexão foi salva. 🤍");
+});
+
+noteModal.addEventListener("click", event => {
+    if (event.target === noteModal) {
+        closeNote();
+    }
+});
+
+
+/* =========================================================
+   RENDERIZAR REFLEXÕES
+========================================================= */
 
 function renderReflections() {
-    const reflections = JSON.parse(localStorage.getItem("reflections") || "[]");
-    const reflectionsList = document.getElementById("reflectionsList");
+    if (!reflectionsList) return;
+
+    const reflections = getReflections();
 
     reflectionsList.innerHTML = "";
 
-    if (reflections.length === 0) {
-        reflectionsList.innerHTML = "<p>Você ainda não tem reflexões salvas.</p>";
+    if (!reflections.length) {
+        reflectionsList.innerHTML = `
+            <div class="reflections-empty">
+                <span>📝</span>
+                <h2>Nenhuma reflexão ainda</h2>
+                <p>Escreva sobre o que Deus falou com você hoje.</p>
+            </div>
+        `;
         return;
     }
 
-    reflections.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((reflection, index) => {
-        const reflectionDiv = document.createElement("div");
-        reflectionDiv.className = "reflection-item";
+    reflections.slice().reverse().forEach(reflection => {
+        const item = document.createElement("article");
+        item.className = "reflection-item";
 
-        const dateDiv = document.createElement("p");
-        dateDiv.className = "reflection-date";
-        const date = new Date(reflection.date);
-        dateDiv.textContent = date.toLocaleDateString("pt-BR", {
+        const date = document.createElement("span");
+        date.className = "reflection-date";
+
+        const dateObject = new Date(reflection.createdAt);
+
+        date.textContent = dateObject.toLocaleDateString("pt-BR", {
             weekday: "long",
-            year: "numeric",
+            day: "numeric",
             month: "long",
-            day: "numeric"
+            year: "numeric"
         });
 
-        const textDiv = document.createElement("p");
-        textDiv.className = "reflection-text";
-        textDiv.textContent = reflection.text;
-
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "verse-action-button";
-        deleteButton.textContent = "🗑️ Deletar";
-        deleteButton.addEventListener("click", () => {
-            const reflections = JSON.parse(localStorage.getItem("reflections") || "[]");
-            reflections.splice(index, 1);
-            localStorage.setItem("reflections", JSON.stringify(reflections));
-            renderReflections();
-        });
+        const text = document.createElement("p");
+        text.textContent = reflection.text;
 
         const actions = document.createElement("div");
-        actions.className = "verse-actions";
-        actions.appendChild(deleteButton);
+        actions.className = "reflection-actions";
 
-        reflectionDiv.appendChild(dateDiv);
-        reflectionDiv.appendChild(textDiv);
-        reflectionDiv.appendChild(actions);
-        reflectionsList.appendChild(reflectionDiv);
+        const remove = document.createElement("button");
+        remove.className = "remove-reflection";
+        remove.textContent = "Excluir";
+
+        remove.addEventListener("click", () => {
+            removeReflection(reflection.id);
+        });
+
+        actions.appendChild(remove);
+
+        item.appendChild(date);
+        item.appendChild(text);
+        item.appendChild(actions);
+
+        reflectionsList.appendChild(item);
     });
 }
 
-// =========================================================
-//   MODALS
-// =========================================================
 
-openPrayerButton.addEventListener("click", () => {
-    prayerModal.classList.remove("hidden");
-});
+/* =========================================================
+   REMOVER REFLEXÃO
+========================================================= */
 
-closePrayerModal.addEventListener("click", () => {
-    prayerModal.classList.add("hidden");
-});
+function removeReflection(id) {
+    const confirmed = confirm("Deseja excluir esta reflexão?");
 
-prayerModal.addEventListener("click", (e) => {
-    if (e.target === prayerModal) {
-        prayerModal.classList.add("hidden");
-    }
-});
+    if (!confirmed) return;
 
-savePrayerButton.addEventListener("click", () => {
-    const prayer = prayerInput.value.trim();
+    const reflections = getReflections();
 
-    if (!prayer) {
-        alert("Por favor, escreva sua oração.");
-        return;
-    }
+    saveReflections(reflections.filter(reflection => reflection.id !== id));
 
-    // Save prayer to localStorage
-    const prayers = JSON.parse(localStorage.getItem("prayers") || "[]");
-    prayers.push({
-        date: new Date().toISOString(),
-        text: prayer
-    });
-    localStorage.setItem("prayers", JSON.stringify(prayers));
-
-    prayerInput.value = "";
-    prayerModal.classList.add("hidden");
-    alert("Oração salva! Que Deus abençoe.");
-});
-
-openNoteButton.addEventListener("click", () => {
-    noteModal.classList.remove("hidden");
-});
-
-closeNoteModal.addEventListener("click", () => {
-    noteModal.classList.add("hidden");
-});
-
-noteModal.addEventListener("click", (e) => {
-    if (e.target === noteModal) {
-        noteModal.classList.add("hidden");
-    }
-});
-
-saveNoteButton.addEventListener("click", () => {
-    const note = noteInput.value.trim();
-
-    if (!note) {
-        alert("Por favor, escreva sua reflexão.");
-        return;
-    }
-
-    const reflections = JSON.parse(localStorage.getItem("reflections") || "[]");
-    reflections.push({
-        date: new Date().toISOString(),
-        text: note
-    });
-    localStorage.setItem("reflections", JSON.stringify(reflections));
-
-    noteInput.value = "";
-    noteModal.classList.add("hidden");
-    alert("Reflexão salva!");
     renderReflections();
+}
+
+
+/* =========================================================
+   TEMA
+========================================================= */
+
+const themeButton = $("themeButton");
+
+function loadTheme() {
+    const theme = localStorage.getItem(STORAGE.theme);
+
+    if (theme === "dark") {
+        document.body.classList.add("dark");
+        themeButton.textContent = "☀";
+    }
+}
+
+themeButton.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+
+    const dark = document.body.classList.contains("dark");
+
+    localStorage.setItem(STORAGE.theme, dark ? "dark" : "light");
+
+    themeButton.textContent = dark ? "☀" : "☾";
 });
 
-// =========================================================
-//   ABAS (CAMINHO)
-// =========================================================
+loadTheme();
 
-const tabButtons = document.querySelectorAll(".tab-button");
-const tabContents = document.querySelectorAll(".tab-content");
 
-tabButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        const tabName = button.dataset.tab;
+/* =========================================================
+   LIMPAR DADOS
+========================================================= */
 
-        tabButtons.forEach(btn => btn.classList.remove("active"));
-        tabContents.forEach(content => content.classList.remove("active"));
-
-        button.classList.add("active");
-        document.getElementById(`${tabName}Tab`).classList.add("active");
-    });
-});
-
-// =========================================================
-//   TELA "MAIS" - LIMPAR DADOS
-// =========================================================
-
-document.getElementById("clearDataButton").addEventListener("click", () => {
+$("clearDataButton").addEventListener("click", () => {
     const confirmed = confirm(
-        "Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita."
+        "Deseja realmente apagar seus favoritos, sequência e todas as reflexões?"
     );
 
-    if (confirmed) {
-        localStorage.clear();
-        alert("Dados limpos com sucesso!");
-        location.reload();
-    }
-});
+    if (!confirmed) return;
 
-// =========================================================
-//   INICIALIZAÇÃO
-// =========================================================
+    localStorage.removeItem(STORAGE.favorites);
+    localStorage.removeItem(STORAGE.streak);
+    localStorage.removeItem(STORAGE.reflections);
 
-window.addEventListener("DOMContentLoaded", () => {
-    initializeTheme();
+    loadStreak();
     renderFavorites();
     renderReflections();
-    loadDevotional();
-    loadBooks();
+
+    alert("Dados apagados.");
 });
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+renderFavorites();
+renderReflections();
+loadVerse();
+loadBooks();
+loadDevotional();
