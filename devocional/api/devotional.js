@@ -64,7 +64,8 @@ module.exports = async function handler(req, res) {
     const verseData = await verseResponse.json();
 
     // 2. Gera a citação e a reflexão devocional com a API da Groq (gratuita)
-    const GROQ_MODEL = "llama-3.3-70b-versatile";
+    const GROQ_MODEL = "llama-3.1-70b-versatile";
+
 
     const groqResponse = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
