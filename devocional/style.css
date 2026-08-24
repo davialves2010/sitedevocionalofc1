@@ -1,3 +1,7 @@
+/* =========================================
+   RESET
+========================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,761 +9,1196 @@
 }
 
 :root {
-    --color-primary: #2d5016;
-    --color-secondary: #d4a574;
-    --color-bg: #fafaf8;
-    --color-text: #1a1a1a;
-    --color-text-light: #666;
-    --color-border: #e0e0e0;
-    --color-card: #ffffff;
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 1.5rem;
-    --spacing-lg: 2rem;
-    --spacing-xl: 3rem;
-    --radius-sm: 0.5rem;
-    --radius-md: 1rem;
-    --radius-lg: 1.5rem;
-    --font-primary: 'Playfair Display', serif;
-    --font-secondary: 'DM Sans', sans-serif;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+    --background: #f4f0e8;
+    --background-soft: #eee9de;
+    --card: rgba(255, 255, 255, .82);
+    --text: #26342c;
+    --muted: #7d857e;
+    --green: #617866;
+    --green-dark: #405646;
+    --green-light: #dfe7df;
+    --white: #ffffff;
+    --border: rgba(38, 52, 44, .08);
+    --danger: #a55b5b;
+
+    --shadow: 0 20px 60px rgba(47, 61, 50, .12);
 }
 
-body.dark-theme {
-    --color-primary: #7ec850;
-    --color-secondary: #c9b59a;
-    --color-bg: #1a1a1a;
-    --color-text: #fafaf8;
-    --color-text-light: #b0b0b0;
-    --color-border: #333333;
-    --color-card: #262626;
+body.dark {
+    --background: #18211b;
+    --background-soft: #202b23;
+    --card: rgba(35, 46, 39, .88);
+    --text: #edf1ed;
+    --muted: #aab4ac;
+    --green: #8fa895;
+    --green-dark: #b2c7b6;
+    --green-light: #304237;
+    --border: rgba(255, 255, 255, .08);
+
+    --shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+
+/* =========================================
+   BODY
+========================================= */
+
+html {
+    min-height: 100%;
 }
 
 body {
-    font-family: var(--font-secondary);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    line-height: 1.6;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-/* LAYOUT PRINCIPAL */
-.app-container {
-    max-width: 480px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
     min-height: 100vh;
-    background-color: var(--color-bg);
-    overflow: hidden;
+    font-family: "DM Sans", sans-serif;
+    color: var(--text);
+    background: var(--background);
+    transition: background .3s, color .3s;
 }
 
-/* SEÇÕES */
+/* =========================================
+   FUNDO
+========================================= */
+
+.background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        linear-gradient(180deg, rgba(246, 242, 232, .20), rgba(246, 242, 232, .96)),
+        url("https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2000&q=80");
+
+    background-size: cover;
+    background-position: center;
+    filter: saturate(.75);
+}
+
+body.dark .background {
+    background:
+        linear-gradient(180deg, rgba(20, 28, 23, .75), rgba(20, 28, 23, .98)),
+        url("https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2000&q=80");
+}
+
+/* =========================================
+   APP
+========================================= */
+
+.app {
+    width: min(100%, 720px);
+    margin: auto;
+    padding: 35px 25px 120px;
+}
+
+/* =========================================
+   TELAS
+========================================= */
+
 .screen {
     display: none;
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 80px;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn .25s ease;
 }
 
-.screen.active {
-    display: flex;
-    flex-direction: column;
+.screen.active-screen {
+    display: block;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* HEADER "HOJE" */
-.today-header {
+/* =========================================
+   HEADER
+========================================= */
+
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg) var(--spacing-md);
-    background: linear-gradient(135deg, var(--color-primary) 0%, #3d6b1f 100%);
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: var(--shadow-md);
+    margin-bottom: 25px;
 }
 
-.today-header h1 {
-    font-family: var(--font-primary);
-    font-size: 1.75rem;
+.small-title,
+.section-label {
+    display: block;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 1.8px;
+    color: var(--muted);
 }
 
-.theme-toggle,
-.more-button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-md);
+.header h1,
+.page-header h1 {
+    margin-top: 6px;
+    font-family: "Playfair Display", serif;
+    font-size: 38px;
+    line-height: 1.1;
+}
+
+.header h1 span {
+    color: var(--green);
+}
+
+.profile-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-size: 22px;
+    color: var(--green);
     cursor: pointer;
-    font-size: 1.2rem;
-    transition: background 0.3s;
 }
 
-.theme-toggle:hover,
-.more-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+/* =========================================
+   DATA
+========================================= */
 
-/* HEADERS DE SEÇÃO */
-.section-header {
+.date-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg) var(--spacing-md);
-    background-color: var(--color-card);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 5;
+    margin-bottom: 18px;
+    color: var(--muted);
+    font-size: 14px;
 }
 
-.section-header h1 {
-    font-family: var(--font-primary);
-    font-size: 1.5rem;
+.streak {
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+}
+
+/* =========================================
+   VERSÍCULO
+========================================= */
+
+.verse-card {
+    position: relative;
+    padding: 30px;
+    border-radius: 28px;
+    color: white;
+
+    background: linear-gradient(135deg, rgba(48, 70, 55, .97), rgba(85, 108, 89, .92));
+
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.verse-card::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    right: -60px;
+    bottom: -70px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .07);
+    pointer-events: none;
+}
+
+.verse-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.verse-top .label {
+    font-size: 10px;
+    letter-spacing: 2px;
     font-weight: 700;
+    opacity: .7;
 }
 
-.icon-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
+.favorite {
+    border: 0;
+    background: transparent;
+    color: white;
+    font-size: 26px;
     cursor: pointer;
-    padding: var(--spacing-xs);
+    z-index: 2;
 }
 
-/* CONTEÚDO DO DEVOCIONAL */
-.today-content {
-    flex: 1;
-    padding: var(--spacing-lg) var(--spacing-md);
-    overflow-y: auto;
+.favorite.saved {
+    color: #ffd9a0;
 }
 
-.devotional-loading {
-    text-align: center;
-    padding: var(--spacing-xl);
-    font-size: 1rem;
-    color: var(--color-text-light);
-    font-style: italic;
+.verse-text {
+    position: relative;
+    z-index: 2;
+    margin-top: 35px;
+    font-family: "Playfair Display", serif;
+    font-size: 28px;
+    line-height: 1.4;
 }
 
-.devotional-quote {
-    font-family: var(--font-primary);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    text-align: center;
-    margin-bottom: var(--spacing-lg);
-    line-height: 1.8;
-    font-style: italic;
+.verse-reference {
+    position: relative;
+    z-index: 2;
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: .75;
 }
 
-body.dark-theme .devotional-quote {
-    color: var(--color-secondary);
-}
-
-.devotional-passage {
-    background-color: var(--color-card);
-    border-left: 4px solid var(--color-primary);
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-}
-
-body.dark-theme .devotional-passage {
-    border-left-color: var(--color-secondary);
-}
-
-.devotional-passage .label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--color-text-light);
-    text-transform: uppercase;
-}
-
-.devotional-verse-text {
-    font-size: 1.1rem;
-    color: var(--color-primary);
-    margin: var(--spacing-sm) 0;
-    font-style: italic;
-    line-height: 1.8;
-}
-
-body.dark-theme .devotional-verse-text {
-    color: var(--color-secondary);
-}
-
-.devotional-verse-ref {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-    text-align: right;
-    margin-top: var(--spacing-sm);
-}
-
-.devotional-reflection {
-    background-color: var(--color-card);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: var(--spacing-lg);
-}
-
-.devotional-reflection h2 {
-    font-family: var(--font-primary);
-    font-size: 1.3rem;
-    margin-bottom: var(--spacing-md);
-    color: var(--color-primary);
-}
-
-body.dark-theme .devotional-reflection h2 {
-    color: var(--color-secondary);
-}
-
-.devotional-reflection p {
-    margin-bottom: var(--spacing-sm);
-    line-height: 1.8;
-    color: var(--color-text);
-    text-align: justify;
+.loading {
+    margin-top: 35px;
+    opacity: .7;
 }
 
 .verse-error {
-    background-color: #ffebee;
-    border: 1px solid #ef5350;
-    color: #c62828;
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    text-align: center;
+    margin-top: 25px;
+    color: #ffd0d0;
+    font-size: 14px;
 }
 
-body.dark-theme .verse-error {
-    background-color: #3e2c2c;
-    border-color: #ef5350;
-    color: #ff8a80;
+.random-button {
+    position: relative;
+    z-index: 2;
+    margin-top: 25px;
+    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .08);
+    color: white;
+    cursor: pointer;
 }
+
+/* =========================================
+   DEVOCIONAL DIÁRIO (IA)
+========================================= */
+
+.devotional-daily {
+    padding: 38px 5px 10px;
+}
+
+.devotional-loading {
+    padding: 30px 5px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.devotional-quote {
+    margin: 14px 0 20px;
+    padding: 24px;
+    border-radius: 22px;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+
+    font-family: "Playfair Display", serif;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--green-dark);
+
+    box-shadow: 0 15px 40px rgba(45, 58, 48, .08);
+}
+
+.devotional-quote::before {
+    content: "\201C";
+    font-size: 34px;
+    color: var(--green);
+    margin-right: 4px;
+}
+
+.devotional-passage {
+    padding: 24px;
+    margin-bottom: 20px;
+    border-radius: 22px;
+    color: white;
+
+    background: linear-gradient(135deg, rgba(48, 70, 55, .97), rgba(85, 108, 89, .92));
+}
+
+.devotional-passage .label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    opacity: .7;
+}
+
+.devotional-verse-text {
+    margin-top: 14px;
+    font-family: "Playfair Display", serif;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.devotional-verse-ref {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: .75;
+}
+
+.devotional-reflection {
+    padding: 5px;
+}
+
+.devotional-reflection h2 {
+    margin-bottom: 12px;
+    font-family: "Playfair Display", serif;
+    font-size: 25px;
+}
+
+.devotional-reflection p {
+    margin-bottom: 14px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--muted);
+}
+
+/* =========================================
+   ORAÇÃO
+========================================= */
+
+.prayer-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px;
+    border-radius: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 15px 40px rgba(45, 58, 48, .08);
+}
+
+.prayer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 55px;
+    height: 55px;
+    border-radius: 18px;
+    background: var(--green-light);
+    font-size: 25px;
+}
+
+.prayer-content {
+    flex: 1;
+}
+
+.prayer-content h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.prayer-content p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.reflection h2,
+.prayer-card h2,
+.note-card h2 {
+    margin: 10px 0 14px;
+    font-family: "Playfair Display", serif;
+    font-size: 27px;
+}
+
+/* =========================================
+   BOTÕES
+========================================= */
+
+button {
+    font-family: inherit;
+}
+
+#prayerButton,
+.primary-button {
+    border: 0;
+    border-radius: 15px;
+    padding: 12px 17px;
+    color: white;
+    background: var(--green);
+    cursor: pointer;
+    font-weight: 600;
+    transition: .2s;
+}
+
+#prayerButton:hover,
+.primary-button:hover {
+    background: var(--green-dark);
+    transform: translateY(-2px);
+}
+
+.secondary-button {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 11px 16px;
+    color: var(--green-dark);
+    background: var(--card);
+    cursor: pointer;
+}
+
+/* =========================================
+   NOTA
+========================================= */
+
+.note-card {
+    margin-top: 20px;
+    padding: 22px;
+    border-radius: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.note-card h2 {
+    font-size: 20px;
+    margin-bottom: 0;
+}
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    font-size: 40px;
+}
+
+/* =========================================
+   BÍBLIA
+========================================= */
+
+.quick-reference {
+    padding: 20px;
+    margin-bottom: 18px;
+    border-radius: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.quick-reference-box {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.quick-reference-box input {
+    flex: 1;
+}
+
+.quick-reference-box button {
+    border: 0;
+    border-radius: 14px;
+    padding: 0 20px;
+    background: var(--green);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#referenceStatus {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.selector-title {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.bible-selector {
+    padding: 22px;
+    border-radius: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.bible-selector label {
+    display: block;
+    margin-bottom: 7px;
+    margin-top: 15px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.bible-selector label:first-of-type {
+    margin-top: 0;
+}
+
+select,
+input,
+textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 14px;
+    background: var(--background-soft);
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+    border-color: var(--green);
+}
+
+.primary-button {
+    width: 100%;
+    margin-top: 18px;
+}
+
+/* =========================================
+   CAPÍTULO
+========================================= */
+
+.chapter-content {
+    margin-top: 25px;
+    padding: 28px;
+    border-radius: 26px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.chapter-title {
+    margin-bottom: 25px;
+    font-family: "Playfair Display", serif;
+    font-size: 30px;
+}
+
+.bible-verse {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.8;
+}
+
+.bible-verse:last-child {
+    border-bottom: 0;
+}
+
+.verse-number {
+    min-width: 25px;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.verse-reading {
+    flex: 1;
+}
+
+.verse-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.small-action {
+    border: 0;
+    border-radius: 10px;
+    padding: 6px 9px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    cursor: pointer;
+}
+
+.small-action:hover {
+    opacity: .8;
+}
+
+/* =========================================
+   BUSCA
+========================================= */
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.search-box input {
+    border: 0;
+    background: transparent;
+}
+
+.search-box button {
+    width: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--green);
+    color: white;
+    cursor: pointer;
+}
+
+.search-status {
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.search-result {
+    padding: 20px;
+    margin-bottom: 12px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.search-result strong {
+    color: var(--green-dark);
+}
+
+.search-result p {
+    margin-top: 10px;
+    line-height: 1.7;
+}
+
+/* =========================================
+   MEU CAMINHO
+========================================= */
+
+.journey-intro {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.journey-intro > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 48px;
+    border-radius: 15px;
+    background: var(--green-light);
+    font-size: 23px;
+}
+
+.journey-intro strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.journey-intro p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.devotional-day {
+    margin-bottom: 28px;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.day-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--green);
+    color: white;
+    font-size: 18px;
+}
+
+.day-header strong {
+    display: block;
+    font-size: 15px;
+}
+
+.day-header small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.saved-note {
+    padding: 20px;
+    margin-bottom: 12px;
+    border-radius: 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.saved-note-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--green);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+}
+
+.saved-note p {
+    color: var(--text);
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+.saved-verses-title {
+    margin: 18px 0 10px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.favorite-item {
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.favorite-item .reference {
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.favorite-item p {
+    margin: 10px 0;
+    line-height: 1.7;
+    font-family: "Playfair Display", serif;
+    font-size: 19px;
+}
+
+.remove-favorite {
+    border: 0;
+    border-radius: 10px;
+    padding: 7px 10px;
+    color: white;
+    background: var(--danger);
+    cursor: pointer;
+}
+
+/* =========================================
+   MAIS
+========================================= */
+
+.stats-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 25px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: white;
+    box-shadow: var(--shadow);
+}
+
+.stats-icon {
+    font-size: 35px;
+}
+
+.stats-card strong {
+    display: block;
+    font-size: 32px;
+}
+
+.stats-card span {
+    opacity: .75;
+}
+
+.menu-card {
+    margin-top: 20px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.menu-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-button:last-child {
+    border-bottom: 0;
+}
+
+.menu-button > span {
+    font-size: 23px;
+}
+
+.menu-button div {
+    flex: 1;
+}
+
+.menu-button strong {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.menu-button small {
+    color: var(--muted);
+}
+
+.menu-button b {
+    color: var(--muted);
+    font-size: 22px;
+}
+
+.menu-button.danger strong {
+    color: var(--danger);
+}
+
+/* =========================================
+   ESTADO VAZIO
+========================================= */
+
+.empty-state {
+    padding: 35px 10px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.empty-state span {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 40px;
+}
+
+.empty-state h2 {
+    margin-bottom: 8px;
+    color: var(--text);
+    font-family: "Playfair Display", serif;
+}
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 15px;
+    background: rgba(20, 30, 24, .45);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    width: min(100%, 600px);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 35px;
+    border-radius: 30px 30px 15px 15px;
+    background: var(--background);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .2);
+    animation: slideUp .3s ease;
+}
+
+.modal-content h2 {
+    margin: 15px 0;
+    font-family: "Playfair Display", serif;
+    font-size: 30px;
+}
+
+.modal-content p {
+    margin-bottom: 15px;
+    line-height: 1.8;
+    color: var(--muted);
+}
+
+.close {
+    float: right;
+    border: 0;
+    background: transparent;
+    font-size: 30px;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+textarea {
+    min-height: 180px;
+    resize: vertical;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(80px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* =========================================
+   HIDDEN
+========================================= */
 
 .hidden {
     display: none !important;
 }
 
-/* AÇÕES DO DIA */
-.today-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
+/* =========================================
+   NAVEGAÇÃO
+========================================= */
+
+.navigation {
     position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    max-width: 480px;
-    margin: 0 auto;
-}
-
-.action-button {
-    flex: 1;
-    padding: var(--spacing-md);
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-family: var(--font-secondary);
-    font-weight: 600;
-    cursor: pointer;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(calc(100% - 30px), 600px);
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-xs);
-    transition: background-color 0.3s, transform 0.2s;
+    justify-content: space-around;
+    padding: 10px;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 40px rgba(40, 50, 42, .15);
+    z-index: 50;
 }
 
-.action-button:hover {
-    background-color: #224011;
-    transform: translateY(-2px);
+body.dark .navigation {
+    background: rgba(30, 40, 34, .92);
 }
 
-body.dark-theme .action-button {
-    background-color: var(--color-primary);
-}
-
-body.dark-theme .action-button:hover {
-    background-color: #6fb846;
-}
-
-.action-button .icon {
-    font-size: 1.5rem;
-}
-
-/* CONTROLES BÍBLIA */
-.bible-controls {
-    display: flex;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-    background-color: var(--color-card);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
-.select-input {
-    flex: 1;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-secondary);
-    cursor: pointer;
-}
-
-/* CONTEÚDO DO CAPÍTULO */
-.chapter-content {
-    padding: var(--spacing-md);
-}
-
-.verse-item {
-    margin-bottom: var(--spacing-md);
-    background-color: var(--color-card);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border-left: 4px solid var(--color-primary);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-body.dark-theme .verse-item {
-    border-left-color: var(--color-secondary);
-}
-
-.verse-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.verse-number {
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-right: var(--spacing-xs);
-}
-
-body.dark-theme .verse-number {
-    color: var(--color-secondary);
-}
-
-.verse-text {
-    line-height: 1.8;
-}
-
-.verse-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--color-border);
-}
-
-.verse-action-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
-}
-
-.verse-action-button:hover {
-    background-color: rgba(45, 80, 22, 0.1);
-}
-
-body.dark-theme .verse-action-button:hover {
-    background-color: rgba(126, 200, 80, 0.1);
-}
-
-/* BUSCA */
-.search-container {
-    padding: var(--spacing-md);
-    background-color: var(--color-card);
-    display: flex;
-    gap: var(--spacing-sm);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.search-input {
-    flex: 1;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-secondary);
-}
-
-.search-input::placeholder {
-    color: var(--color-text-light);
-}
-
-.primary-button {
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-family: var(--font-secondary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.primary-button:hover {
-    background-color: #224011;
-}
-
-body.dark-theme .primary-button {
-    background-color: #7ec850;
-}
-
-body.dark-theme .primary-button:hover {
-    background-color: #6fb846;
-}
-
-.search-results {
-    padding: var(--spacing-md);
-}
-
-.search-result-item {
-    background-color: var(--color-card);
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border-left: 4px solid var(--color-secondary);
-}
-
-body.dark-theme .search-result-item {
-    border-left-color: var(--color-secondary);
-}
-
-.search-result-reference {
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-body.dark-theme .search-result-reference {
-    color: var(--color-secondary);
-}
-
-.search-result-text {
-    line-height: 1.8;
-    margin-bottom: var(--spacing-sm);
-}
-
-/* ABAS */
-.path-tabs {
-    display: flex;
-    background-color: var(--color-card);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
-.tab-button {
-    flex: 1;
-    padding: var(--spacing-md);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-secondary);
-    font-weight: 600;
-    color: var(--color-text-light);
-    border-bottom: 3px solid transparent;
-    transition: color 0.3s, border-color 0.3s;
-}
-
-.tab-button.active {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
-}
-
-body.dark-theme .tab-button.active {
-    color: var(--color-secondary);
-    border-bottom-color: var(--color-secondary);
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.verses-list,
-.reflections-list {
-    padding: var(--spacing-md);
-}
-
-.verses-list .verse-item {
-    cursor: pointer;
-}
-
-.reflection-item {
-    background-color: var(--color-card);
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border-left: 4px solid var(--color-secondary);
-}
-
-body.dark-theme .reflection-item {
-    border-left-color: var(--color-secondary);
-}
-
-.reflection-date {
-    font-size: 0.85rem;
-    color: var(--color-text-light);
-    margin-bottom: var(--spacing-xs);
-}
-
-.reflection-text {
-    line-height: 1.8;
-}
-
-/* MAIS OPÇÕES */
-.more-options {
-    padding: var(--spacing-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.more-option-button {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-family: var(--font-secondary);
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.more-option-button:hover {
-    background-color: #f5f5f5;
-    transform: translateX(4px);
-}
-
-body.dark-theme .more-option-button:hover {
-    background-color: #333333;
-}
-
-.more-option-button.danger:hover {
-    background-color: #ffebee;
-    color: #c62828;
-}
-
-body.dark-theme .more-option-button.danger:hover {
-    background-color: #3e2c2c;
-    color: #ff8a80;
-}
-
-.more-option-button .icon {
-    font-size: 1.5rem;
-}
-
-/* NAVEGAÇÃO INFERIOR */
-.bottom-nav {
-    display: flex;
-    gap: 0;
-    background-color: var(--color-card);
-    border-top: 1px solid var(--color-border);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 480px;
-    margin: 0 auto;
-    z-index: 100;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.nav-button {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: var(--spacing-sm);
+.nav-item {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 8px 13px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    color: var(--color-text-light);
-    font-family: var(--font-secondary);
-    font-size: 0.75rem;
+}
+
+.nav-item span {
+    font-size: 20px;
+}
+
+.nav-item small {
+    font-size: 10px;
+}
+
+.nav-item.active {
+    color: var(--green-dark);
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media(max-width: 600px) {
+
+    .app {
+        padding: 25px 18px 110px;
+    }
+
+    .header h1,
+    .page-header h1 {
+        font-size: 32px;
+    }
+
+    .verse-card {
+        padding: 24px;
+    }
+
+    .verse-text {
+        font-size: 24px;
+    }
+
+    .prayer-card {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    #prayerButton {
+        width: 100%;
+    }
+
+    .navigation {
+        bottom: 10px;
+        width: calc(100% - 18px);
+    }
+
+    .nav-item {
+        padding: 7px 8px;
+    }
+
+    .nav-item small {
+        font-size: 9px;
+    }
+
+    .note-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .secondary-button {
+        width: 100%;
+    }
+
+    .quick-reference-box button {
+        padding: 0 15px;
+    }
+
+}
+
+/* =========================================
+   CAMINHOS
+========================================= */
+
+.paths-navigation {
+    display: flex;
+    gap: 8px;
+    margin: 20px 0;
+    padding: 6px;
+    border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+}
+
+.paths-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px 10px;
+    border: 0;
+    border-radius: 13px;
+    background: transparent;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 13px;
     font-weight: 600;
-    transition: color 0.3s;
-}
-
-.nav-button.active {
-    color: var(--color-primary);
-}
-
-body.dark-theme .nav-button.active {
-    color: var(--color-secondary);
-}
-
-.nav-button .icon {
-    font-size: 1.5rem;
-}
-
-/* MODALS */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.modal.hidden {
-    display: none !important;
-}
-
-.modal-content {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 480px;
-    margin: 0 auto;
-    background-color: var(--color-card);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: var(--spacing-lg);
-    animation: slideUp 0.3s ease-out;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-.modal-content .close {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    background: none;
-    border: none;
-    font-size: 1.5rem;
     cursor: pointer;
-    color: var(--color-text-light);
+    transition: .2s;
 }
 
-.modal-content .close:hover {
-    color: var(--color-text);
+.paths-tab.active {
+    background: var(--green);
+    color: white;
 }
 
-.section-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--color-text-light);
-    text-transform: uppercase;
+.path-content {
+    display: none;
+}
+
+.path-content.active-path {
     display: block;
-    margin-bottom: var(--spacing-xs);
 }
 
-.modal-content h2 {
-    font-family: var(--font-primary);
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-md);
+/* =========================================
+   REFLEXÕES
+========================================= */
+
+.reflection-item {
+    padding: 22px;
+    margin-bottom: 14px;
+    border-radius: 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(40, 50, 42, .06);
 }
 
-textarea {
-    width: 100%;
-    min-height: 200px;
-    padding: var(--spacing-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-secondary);
-    font-size: 1rem;
-    resize: vertical;
-    margin-bottom: var(--spacing-md);
+.reflection-date {
+    display: block;
+    margin-bottom: 14px;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
 }
 
-textarea::placeholder {
-    color: var(--color-text-light);
+.reflection-item p {
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
 }
 
-.prayer-footer {
+.reflection-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.remove-reflection {
+    border: 0;
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: var(--danger);
+    color: white;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.reflections-empty {
+    padding: 35px 15px;
     text-align: center;
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-border);
-    color: var(--color-text-light);
+    color: var(--muted);
 }
 
-/* RESPONSIVO */
-@media (max-width: 480px) {
-    .app-container {
-        max-width: 100%;
-    }
+.reflections-empty span {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 40px;
+}
 
-    .bottom-nav {
-        max-width: 100%;
-    }
+.reflections-empty h2 {
+    margin-bottom: 8px;
+    color: var(--text);
+    font-family: "Playfair Display", serif;
+}
 
-    .modal-content {
-        max-width: 100%;
-    }
+/* =========================================
+   RESPONSIVO
+========================================= */
 
-    .today-actions {
-        max-width: 100%;
-    }
-
-    .devotional-quote {
-        font-size: 1.25rem;
-    }
-
-    .today-header h1 {
-        font-size: 1.5rem;
+@media(max-width: 600px) {
+    .paths-tab {
+        font-size: 11px;
+        padding: 11px 6px;
     }
 }
