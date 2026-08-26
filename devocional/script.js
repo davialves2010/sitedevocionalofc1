@@ -56,6 +56,8 @@ const planReading = $("planReading");
 const planBackButton = $("planBackButton");
 const planReadingTitle = $("planReadingTitle");
 const planReadingDayLabel = $("planReadingDayLabel");
+const planPrevDayButton = $("planPrevDayButton");
+const planNextDayButton = $("planNextDayButton");
 const planProgressFill = $("planProgressFill");
 const planReadingLoading = $("planReadingLoading");
 const planReadingContent = $("planReadingContent");
@@ -1222,6 +1224,9 @@ if (plansShortcutButton) {
    PLANOS DE LEITURA — LEITURA DO DIA
 ========================================================= */
 
+let currentPlan = null;
+let currentPlanViewDay = 1;
+
 function openPlanReading(planId) {
     const plan = PLANS.find(item => item.id === planId);
     if (!plan) return;
@@ -1229,6 +1234,9 @@ function openPlanReading(planId) {
     const state = getPlanState(planId);
 
     const nextDay = Math.min(state.completedDays.length + 1, plan.duration);
+
+    currentPlan = plan;
+    currentPlanViewDay = nextDay;
 
     plansList.classList.add("hidden");
     planReading.classList.remove("hidden");
@@ -1244,9 +1252,39 @@ if (planBackButton) {
     });
 }
 
+function updatePlanNavButtons() {
+    if (!planPrevDayButton || !planNextDayButton || !currentPlan) return;
+
+    planPrevDayButton.disabled = currentPlanViewDay <= 1;
+    planNextDayButton.disabled = currentPlanViewDay >= currentPlan.duration;
+}
+
+if (planPrevDayButton) {
+    planPrevDayButton.addEventListener("click", () => {
+        if (!currentPlan || currentPlanViewDay <= 1) return;
+
+        currentPlanViewDay -= 1;
+        loadPlanDay(currentPlan, currentPlanViewDay);
+    });
+}
+
+if (planNextDayButton) {
+    planNextDayButton.addEventListener("click", () => {
+        if (!currentPlan || currentPlanViewDay >= currentPlan.duration) return;
+
+        currentPlanViewDay += 1;
+        loadPlanDay(currentPlan, currentPlanViewDay);
+    });
+}
+
 async function loadPlanDay(plan, day) {
+    currentPlan = plan;
+    currentPlanViewDay = day;
+
     planReadingTitle.textContent = plan.title.toUpperCase();
     planReadingDayLabel.textContent = `Dia ${day} de ${plan.duration}`;
+
+    updatePlanNavButtons();
 
     const state = getPlanState(plan.id);
     planProgressFill.style.width =
