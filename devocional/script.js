@@ -49,6 +49,27 @@ const calendarGrid = $("calendarGrid");
 const calendarPrevButton = $("calendarPrevButton");
 const calendarNextButton = $("calendarNextButton");
 
+/* PLANOS DE LEITURA */
+const plansShortcutButton = $("plansShortcutButton");
+const plansList = $("plansList");
+const planReading = $("planReading");
+const planBackButton = $("planBackButton");
+const planReadingTitle = $("planReadingTitle");
+const planReadingDayLabel = $("planReadingDayLabel");
+const planProgressFill = $("planProgressFill");
+const planReadingLoading = $("planReadingLoading");
+const planReadingContent = $("planReadingContent");
+const planReadingError = $("planReadingError");
+const planVerseCard = $("planVerseCard");
+const planVerseText = $("planVerseText");
+const planVerseReference = $("planVerseReference");
+const planChapterCard = $("planChapterCard");
+const planChapterTitle = $("planChapterTitle");
+const planChapterVerses = $("planChapterVerses");
+const planDevotionalTitle = $("planDevotionalTitle");
+const planDevotionalParagraphs = $("planDevotionalParagraphs");
+const planCompleteButton = $("planCompleteButton");
+
 /* BÍBLIA */
 const versionSelect = $("versionSelect");
 const bookSelect = $("bookSelect");
@@ -83,8 +104,37 @@ const STORAGE = {
     streak: "devocional_streak",
     theme: "devocional_theme",
     reflections: "devocional_reflections",
-    completedDays: "devocional_completed_days"
+    completedDays: "devocional_completed_days",
+    planProgress: "devocional_plan_progress"
 };
+
+
+/* =========================================================
+   PLANOS DE LEITURA — DADOS
+========================================================= */
+
+const PLANS = [
+    {
+        id: "joao21",
+        title: "Evangelho de João",
+        subtitle: "21 dias com Jesus",
+        icon: "✝️",
+        duration: 21,
+        description:
+            "Percorra o Evangelho de João, um capítulo por dia, e conheça mais " +
+            "profundamente quem é Jesus."
+    },
+    {
+        id: "ansiedade30",
+        title: "Paz em meio à ansiedade",
+        subtitle: "30 dias de confiança",
+        icon: "🕊️",
+        duration: 30,
+        description:
+            "Um mês de versículos e reflexões para entregar suas preocupações " +
+            "a Deus e encontrar descanso."
+    }
+];
 
 
 /* =========================================================
@@ -834,6 +884,12 @@ navItems.forEach(button => {
             renderFavorites();
             renderReflections();
         }
+
+        if (screenId === "plansScreen") {
+            planReading.classList.add("hidden");
+            plansList.classList.remove("hidden");
+            renderPlansList();
+        }
     });
 });
 
@@ -1063,12 +1119,264 @@ loadTheme();
 
 
 /* =========================================================
+   PLANOS DE LEITURA — PROGRESSO
+========================================================= */
+
+function getPlanProgress() {
+    return JSON.parse(localStorage.getItem(STORAGE.planProgress) || "{}");
+}
+
+function savePlanProgress(progress) {
+    localStorage.setItem(STORAGE.planProgress, JSON.stringify(progress));
+}
+
+function getPlanState(planId) {
+    const progress = getPlanProgress();
+    return progress[planId] || { completedDays: [] };
+}
+
+
+/* =========================================================
+   PLANOS DE LEITURA — LISTA
+========================================================= */
+
+function renderPlansList() {
+    if (!plansList) return;
+
+    plansList.innerHTML = "";
+
+    PLANS.forEach(plan => {
+        const state = getPlanState(plan.id);
+        const completedCount = state.completedDays.length;
+        const isFinished = completedCount >= plan.duration;
+        const hasStarted = completedCount > 0;
+
+        const card = document.createElement("article");
+        card.className = "plan-card";
+
+        const icon = document.createElement("span");
+        icon.className = "plan-icon";
+        icon.textContent = plan.icon;
+
+        const info = document.createElement("div");
+        info.className = "plan-card-info";
+
+        const title = document.createElement("strong");
+        title.textContent = plan.title;
+
+        const subtitle = document.createElement("small");
+        subtitle.textContent = plan.subtitle;
+
+        const description = document.createElement("p");
+        description.textContent = plan.description;
+
+        const progressBar = document.createElement("div");
+        progressBar.className = "plan-progress-bar";
+
+        const progressFill = document.createElement("div");
+        progressFill.className = "plan-progress-fill";
+        progressFill.style.width = `${Math.min(100, (completedCount / plan.duration) * 100)}%`;
+
+        progressBar.appendChild(progressFill);
+
+        const progressLabel = document.createElement("small");
+        progressLabel.className = "plan-progress-label";
+        progressLabel.textContent = isFinished
+            ? `Plano concluído · ${plan.duration}/${plan.duration} dias`
+            : `${completedCount}/${plan.duration} dias`;
+
+        info.appendChild(title);
+        info.appendChild(subtitle);
+        info.appendChild(description);
+        info.appendChild(progressBar);
+        info.appendChild(progressLabel);
+
+        const actionButton = document.createElement("button");
+        actionButton.className = "plan-action-button";
+        actionButton.textContent = isFinished
+            ? "Ver de novo"
+            : hasStarted
+                ? "Continuar"
+                : "Começar";
+
+        actionButton.addEventListener("click", () => {
+            openPlanReading(plan.id);
+        });
+
+        card.appendChild(icon);
+        card.appendChild(info);
+        card.appendChild(actionButton);
+
+        plansList.appendChild(card);
+    });
+}
+
+if (plansShortcutButton) {
+    plansShortcutButton.addEventListener("click", () => {
+        document.querySelector('.nav-item[data-screen="plansScreen"]').click();
+    });
+}
+
+
+/* =========================================================
+   PLANOS DE LEITURA — LEITURA DO DIA
+========================================================= */
+
+function openPlanReading(planId) {
+    const plan = PLANS.find(item => item.id === planId);
+    if (!plan) return;
+
+    const state = getPlanState(planId);
+
+    const nextDay = Math.min(state.completedDays.length + 1, plan.duration);
+
+    plansList.classList.add("hidden");
+    planReading.classList.remove("hidden");
+
+    loadPlanDay(plan, nextDay);
+}
+
+if (planBackButton) {
+    planBackButton.addEventListener("click", () => {
+        planReading.classList.add("hidden");
+        plansList.classList.remove("hidden");
+        renderPlansList();
+    });
+}
+
+async function loadPlanDay(plan, day) {
+    planReadingTitle.textContent = plan.title.toUpperCase();
+    planReadingDayLabel.textContent = `Dia ${day} de ${plan.duration}`;
+
+    const state = getPlanState(plan.id);
+    planProgressFill.style.width =
+        `${Math.min(100, (state.completedDays.length / plan.duration) * 100)}%`;
+
+    planReadingLoading.classList.remove("hidden");
+    planReadingContent.classList.add("hidden");
+    planReadingError.classList.add("hidden");
+
+    planVerseCard.classList.add("hidden");
+    planChapterCard.classList.add("hidden");
+
+    const cacheKey = `plano_leitura_${plan.id}_dia_${day}`;
+    const cached = localStorage.getItem(cacheKey);
+
+    try {
+        let data;
+
+        if (cached) {
+            data = JSON.parse(cached);
+        } else {
+            const response = await fetch(`/api/plan-reading?plan=${plan.id}&day=${day}`);
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP ${response.status}`);
+            }
+
+            data = await response.json();
+
+            localStorage.setItem(cacheKey, JSON.stringify(data));
+        }
+
+        renderPlanDay(plan, day, data);
+
+    } catch (error) {
+        console.error(error);
+
+        planReadingLoading.classList.add("hidden");
+
+        planReadingError.textContent = "Não foi possível carregar a leitura de hoje.";
+        planReadingError.classList.remove("hidden");
+    }
+}
+
+function renderPlanDay(plan, day, data) {
+    if (data.type === "verse") {
+        planVerseText.textContent = `"${data.passageText}"`;
+        planVerseReference.textContent = data.reference;
+        planVerseCard.classList.remove("hidden");
+
+    } else {
+        planChapterTitle.textContent = data.reference;
+        planChapterVerses.innerHTML = "";
+
+        data.verses.forEach(verse => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "bible-verse";
+
+            const number = document.createElement("span");
+            number.className = "verse-number";
+            number.textContent = verse.number;
+
+            const content = document.createElement("div");
+            content.className = "verse-reading";
+            content.textContent = verse.text;
+
+            wrapper.appendChild(number);
+            wrapper.appendChild(content);
+
+            planChapterVerses.appendChild(wrapper);
+        });
+
+        planChapterCard.classList.remove("hidden");
+    }
+
+    planDevotionalTitle.textContent = data.devotionalTitle;
+    planDevotionalParagraphs.innerHTML = "";
+
+    data.devotionalParagraphs.forEach(paragraph => {
+        const p = document.createElement("p");
+        p.textContent = paragraph;
+        planDevotionalParagraphs.appendChild(p);
+    });
+
+    planReadingLoading.classList.add("hidden");
+    planReadingContent.classList.remove("hidden");
+
+    const state = getPlanState(plan.id);
+    const isCompleted = state.completedDays.includes(day);
+
+    planCompleteButton.textContent = isCompleted ? "Dia concluído ✓" : "Concluir dia";
+    planCompleteButton.disabled = isCompleted;
+
+    planCompleteButton.onclick = () => completePlanDay(plan, day);
+}
+
+function completePlanDay(plan, day) {
+    const progress = getPlanProgress();
+    const state = progress[plan.id] || { completedDays: [] };
+
+    if (!state.completedDays.includes(day)) {
+        state.completedDays.push(day);
+    }
+
+    progress[plan.id] = state;
+    savePlanProgress(progress);
+
+    // Concluir uma leitura do plano também conta como o devocional do dia
+    markDevotionalComplete();
+
+    planProgressFill.style.width =
+        `${Math.min(100, (state.completedDays.length / plan.duration) * 100)}%`;
+
+    if (day < plan.duration) {
+        loadPlanDay(plan, day + 1);
+    } else {
+        planCompleteButton.textContent = "Plano concluído! 🎉";
+        planCompleteButton.disabled = true;
+    }
+}
+
+
+/* =========================================================
    LIMPAR DADOS
 ========================================================= */
 
 $("clearDataButton").addEventListener("click", () => {
     const confirmed = confirm(
-        "Deseja realmente apagar seus favoritos, sequência e todas as reflexões?"
+        "Deseja realmente apagar seus favoritos, sequência, reflexões e o " +
+        "progresso dos seus planos de leitura?"
     );
 
     if (!confirmed) return;
@@ -1077,12 +1385,18 @@ $("clearDataButton").addEventListener("click", () => {
     localStorage.removeItem(STORAGE.streak);
     localStorage.removeItem(STORAGE.reflections);
     localStorage.removeItem(STORAGE.completedDays);
+    localStorage.removeItem(STORAGE.planProgress);
+
+    Object.keys(localStorage)
+        .filter(key => key.startsWith("plano_leitura_"))
+        .forEach(key => localStorage.removeItem(key));
 
     updateStreakDisplays();
     updateCompleteButton();
     renderCalendar();
     renderFavorites();
     renderReflections();
+    renderPlansList();
 
     alert("Dados apagados.");
 });
@@ -1095,6 +1409,7 @@ $("clearDataButton").addEventListener("click", () => {
 renderFavorites();
 renderReflections();
 renderCalendar();
+renderPlansList();
 updateCompleteButton();
 loadVerse();
 loadBooks();
