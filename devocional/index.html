@@ -96,6 +96,10 @@
                         <div id="devotionalParagraphs"></div>
                     </div>
 
+                    <button id="devotionalCompleteButton" class="devotional-complete-button" type="button">
+                        Concluir devocional de hoje
+                    </button>
+
                 </div>
 
                 <div id="devotionalError" class="verse-error hidden"></div>
@@ -239,6 +243,11 @@
                     📝
                     <span>Reflexões feitas</span>
                 </button>
+
+                <button class="paths-tab" data-path="streakCalendar" type="button">
+                    🔥
+                    <span>Sequência</span>
+                </button>
             </div>
 
             <!-- VERSÍCULOS SALVOS -->
@@ -249,6 +258,35 @@
             <!-- REFLEXÕES -->
             <div id="reflections" class="path-content">
                 <div id="reflectionsList" class="reflections-list"></div>
+            </div>
+
+            <!-- SEQUÊNCIA / CALENDÁRIO -->
+            <div id="streakCalendar" class="path-content">
+
+                <div class="streak-summary">
+                    <span class="streak-summary-icon">🔥</span>
+                    <div>
+                        <strong id="calendarStreakCount">0</strong>
+                        <span>dias seguidos</span>
+                    </div>
+                </div>
+
+                <div class="calendar-card">
+
+                    <div class="calendar-header">
+                        <button id="calendarPrevButton" class="calendar-nav" type="button" aria-label="Mês anterior">‹</button>
+                        <span id="calendarMonthLabel" class="calendar-month-label"></span>
+                        <button id="calendarNextButton" class="calendar-nav" type="button" aria-label="Próximo mês">›</button>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    </div>
+
+                    <div id="calendarGrid" class="calendar-grid"></div>
+
+                </div>
+
             </div>
 
         </section>
