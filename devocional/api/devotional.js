@@ -64,8 +64,7 @@ module.exports = async function handler(req, res) {
     const verseData = await verseResponse.json();
 
     // 2. Gera a citação e a reflexão devocional com a API da Groq (gratuita)
-    const GROQ_MODEL = "llama-3.1-70b-versatile";
-
+    const GROQ_MODEL = "openai/gpt-oss-120b";
 
     const groqResponse = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -134,8 +133,7 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Não foi possível gerar o devocional de hoje.",
-      debug: error.message
+      error: "Não foi possível gerar o devocional de hoje."
     });
   }
 };
