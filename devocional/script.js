@@ -29,6 +29,7 @@ const loading = $("loading");
 const verseContent = $("verseContent");
 const verseError = $("verseError");
 const favoriteButton = $("favoriteButton");
+const shareVerseButton = $("shareVerseButton");
 const randomVerseButton = $("randomVerseButton");
 
 /* DEVOCIONAL DIÁRIO */
@@ -41,6 +42,7 @@ const devotionalVerseRef = $("devotionalVerseRef");
 const devotionalTitle = $("devotionalTitle");
 const devotionalParagraphs = $("devotionalParagraphs");
 const devotionalCompleteButton = $("devotionalCompleteButton");
+const shareDevotionalButton = $("shareDevotionalButton");
 
 /* CALENDÁRIO DE SEQUÊNCIA */
 const calendarStreakCount = $("calendarStreakCount");
@@ -1671,3 +1673,186 @@ if (reminderTimeInput) {
 }
 
 loadReminderSettings();
+
+
+/* =========================================================
+   COMPARTILHAR COMO IMAGEM
+========================================================= */
+
+function wrapCanvasText(ctx, text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    words.forEach(word => {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = ctx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = testLine;
+        }
+    });
+
+    if (currentLine) {
+        lines.push(currentLine);
+    }
+
+    return lines;
+}
+
+async function generateShareCanvas({ label, mainText, reference }) {
+    const width = 1080;
+    const height = 1920;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    // Garante que as fontes do site já estão carregadas antes de desenhar
+    if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+    }
+
+    // Fundo em degradê, igual ao tema verde do app
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#304637");
+    gradient.addColorStop(1, "#566c59");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Círculo decorativo (mesmo efeito do card do versículo no site)
+    ctx.fillStyle = "rgba(255,255,255,0.07)";
+    ctx.beginPath();
+    ctx.arc(width - 120, height - 200, 280, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.textAlign = "center";
+
+    // Label pequeno no topo
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "700 30px 'DM Sans', sans-serif";
+    ctx.fillText(label.toUpperCase(), width / 2, 260);
+
+    // Texto principal (citação/versículo)
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 66px 'Playfair Display', serif";
+
+    const maxTextWidth = width - 160;
+    const lines = wrapCanvasText(ctx, `"${mainText}"`, maxTextWidth);
+
+    const lineHeight = 88;
+    const startY = height / 2 - ((lines.length - 1) * lineHeight) / 2;
+
+    lines.forEach((line, index) => {
+        ctx.fillText(line, width / 2, startY + index * lineHeight);
+    });
+
+    // Referência bíblica
+    if (reference) {
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.font = "600 36px 'DM Sans', sans-serif";
+        ctx.fillText(reference, width / 2, startY + lines.length * lineHeight + 55);
+    }
+
+    // Marca do app no rodapé
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.font = "600 30px 'DM Sans', sans-serif";
+    ctx.fillText("🙏 Meu Devocional", width / 2, height - 100);
+
+    return canvas;
+}
+
+function shareCanvasAsImage(canvas, filename, shareTitle, shareText) {
+    canvas.toBlob(async blob => {
+        if (!blob) return;
+
+        const file = new File([blob], filename, { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: shareTitle,
+                    text: shareText
+                });
+                return;
+            } catch (error) {
+                // Pessoa cancelou o compartilhamento ou o navegador recusou —
+                // nesse caso, cai no fallback de baixar a imagem abaixo.
+                if (error.name === "AbortError") return;
+                console.error(error);
+            }
+        }
+
+        // Fallback: baixa a imagem pra pessoa compartilhar manualmente
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    }, "image/png");
+}
+
+if (shareVerseButton) {
+    shareVerseButton.addEventListener("click", async () => {
+        const text = verseText.textContent.replace(/^"|"$/g, "");
+        const reference = verseReference.textContent;
+
+        if (!text) return;
+
+        shareVerseButton.disabled = true;
+
+        try {
+            const canvas = await generateShareCanvas({
+                label: "Palavra de hoje",
+                mainText: text,
+                reference
+            });
+
+            shareCanvasAsImage(
+                canvas,
+                "versiculo-do-dia.png",
+                "Versículo do dia",
+                `${reference} — Meu Devocional`
+            );
+        } finally {
+            shareVerseButton.disabled = false;
+        }
+    });
+}
+
+if (shareDevotionalButton) {
+    shareDevotionalButton.addEventListener("click", async () => {
+        const quote = devotionalQuote.textContent;
+
+        if (!quote) return;
+
+        shareDevotionalButton.disabled = true;
+
+        try {
+            const canvas = await generateShareCanvas({
+                label: "Devocional de hoje",
+                mainText: quote,
+                reference: devotionalVerseRef.textContent
+            });
+
+            shareCanvasAsImage(
+                canvas,
+                "devocional-do-dia.png",
+                "Devocional de hoje",
+                "Meu Devocional"
+            );
+        } finally {
+            shareDevotionalButton.disabled = false;
+        }
+    });
+}
