@@ -40,6 +40,14 @@ const devotionalVerseText = $("devotionalVerseText");
 const devotionalVerseRef = $("devotionalVerseRef");
 const devotionalTitle = $("devotionalTitle");
 const devotionalParagraphs = $("devotionalParagraphs");
+const devotionalCompleteButton = $("devotionalCompleteButton");
+
+/* CALENDÁRIO DE SEQUÊNCIA */
+const calendarStreakCount = $("calendarStreakCount");
+const calendarMonthLabel = $("calendarMonthLabel");
+const calendarGrid = $("calendarGrid");
+const calendarPrevButton = $("calendarPrevButton");
+const calendarNextButton = $("calendarNextButton");
 
 /* BÍBLIA */
 const versionSelect = $("versionSelect");
@@ -74,7 +82,8 @@ const STORAGE = {
     favorites: "devocional_favorites",
     streak: "devocional_streak",
     theme: "devocional_theme",
-    reflections: "devocional_reflections"
+    reflections: "devocional_reflections",
+    completedDays: "devocional_completed_days"
 };
 
 
@@ -121,22 +130,153 @@ showDate();
 
 
 /* =========================================================
-   STREAK
+   SEQUÊNCIA (STREAK) E CALENDÁRIO
 ========================================================= */
 
-function loadStreak() {
-    let value = Number(localStorage.getItem(STORAGE.streak));
+function pad(number) {
+    return String(number).padStart(2, "0");
+}
 
-    if (!value) {
-        value = 1;
-        localStorage.setItem(STORAGE.streak, value);
+function dateKey(date) {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function getCompletedDays() {
+    return new Set(JSON.parse(localStorage.getItem(STORAGE.completedDays) || "[]"));
+}
+
+function saveCompletedDays(daysSet) {
+    localStorage.setItem(STORAGE.completedDays, JSON.stringify([...daysSet]));
+}
+
+function calculateStreak(completedDays) {
+    let count = 0;
+    const cursor = new Date();
+
+    // Se hoje ainda não foi concluído, a sequência conta a partir de
+    // ontem (o dia de hoje ainda não "quebrou" a sequência).
+    if (!completedDays.has(dateKey(cursor))) {
+        cursor.setDate(cursor.getDate() - 1);
     }
+
+    while (completedDays.has(dateKey(cursor))) {
+        count++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return count;
+}
+
+function updateStreakDisplays() {
+    const value = calculateStreak(getCompletedDays());
 
     streak.textContent = value;
     statsStreak.textContent = value;
+
+    if (calendarStreakCount) {
+        calendarStreakCount.textContent = value;
+    }
 }
 
-loadStreak();
+function isTodayCompleted() {
+    return getCompletedDays().has(dateKey(new Date()));
+}
+
+function updateCompleteButton() {
+    if (!devotionalCompleteButton) return;
+
+    if (isTodayCompleted()) {
+        devotionalCompleteButton.textContent = "Concluído hoje ✓";
+        devotionalCompleteButton.disabled = true;
+    } else {
+        devotionalCompleteButton.textContent = "Concluir devocional de hoje";
+        devotionalCompleteButton.disabled = false;
+    }
+}
+
+function markDevotionalComplete() {
+    const completedDays = getCompletedDays();
+    completedDays.add(dateKey(new Date()));
+
+    saveCompletedDays(completedDays);
+
+    updateStreakDisplays();
+    updateCompleteButton();
+    renderCalendar();
+}
+
+if (devotionalCompleteButton) {
+    devotionalCompleteButton.addEventListener("click", markDevotionalComplete);
+}
+
+
+/* =========================================================
+   CALENDÁRIO VISUAL
+========================================================= */
+
+let calendarViewDate = new Date();
+calendarViewDate.setDate(1);
+
+function renderCalendar() {
+    if (!calendarGrid) return;
+
+    const completedDays = getCompletedDays();
+    const todayKeyValue = dateKey(new Date());
+
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+
+    calendarMonthLabel.textContent = calendarViewDate.toLocaleDateString("pt-BR", {
+        month: "long",
+        year: "numeric"
+    });
+
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    calendarGrid.innerHTML = "";
+
+    for (let i = 0; i < firstWeekday; i++) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-day empty";
+        calendarGrid.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cellDate = new Date(year, month, day);
+        const key = dateKey(cellDate);
+
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.textContent = day;
+
+        if (completedDays.has(key)) {
+            cell.classList.add("completed");
+        }
+
+        if (key === todayKeyValue) {
+            cell.classList.add("today");
+        }
+
+        calendarGrid.appendChild(cell);
+    }
+}
+
+if (calendarPrevButton) {
+    calendarPrevButton.addEventListener("click", () => {
+        calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
+        renderCalendar();
+    });
+}
+
+if (calendarNextButton) {
+    calendarNextButton.addEventListener("click", () => {
+        calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
+        renderCalendar();
+    });
+}
+
+updateStreakDisplays();
 
 
 /* =========================================================
@@ -322,6 +462,8 @@ function renderDevotional(data) {
     devotionalLoading.classList.add("hidden");
     devotionalError.classList.add("hidden");
     devotionalContent.classList.remove("hidden");
+
+    updateCompleteButton();
 }
 
 async function loadDevotional() {
@@ -725,6 +867,11 @@ pathTabs.forEach(tab => {
         if (target === "reflections") {
             renderReflections();
         }
+
+        if (target === "streakCalendar") {
+            renderCalendar();
+            updateStreakDisplays();
+        }
     });
 });
 
@@ -929,8 +1076,11 @@ $("clearDataButton").addEventListener("click", () => {
     localStorage.removeItem(STORAGE.favorites);
     localStorage.removeItem(STORAGE.streak);
     localStorage.removeItem(STORAGE.reflections);
+    localStorage.removeItem(STORAGE.completedDays);
 
-    loadStreak();
+    updateStreakDisplays();
+    updateCompleteButton();
+    renderCalendar();
     renderFavorites();
     renderReflections();
 
@@ -944,6 +1094,8 @@ $("clearDataButton").addEventListener("click", () => {
 
 renderFavorites();
 renderReflections();
+renderCalendar();
+updateCompleteButton();
 loadVerse();
 loadBooks();
 loadDevotional();
