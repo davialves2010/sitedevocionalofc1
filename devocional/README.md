@@ -1,13 +1,13 @@
 # Devocional Diário — Deploy na Vercel (com API gratuita da Groq)
 
 ## Estrutura
-
+```
 index.html
 style.css
 script.js
 api/
-devotional.js <- serverless function (roda no servidor, não no navegador)
-
+  devotional.js   <- serverless function (roda no servidor, não no navegador)
+```
 
 ## 1. Pegue sua chave gratuita da Groq
 
@@ -25,65 +25,68 @@ o que deixa as respostas bem rápidas.
 
 ## 2. Deploy na Vercel
 
-1. **Crie um repositório** com estes arquivos.
-2. **Vá para vercel.com** e conecte seu repositório.
-3. Durante o setup, vá em **Settings** → **Environment Variables**.
-4. Adicione: `GROQ_API_KEY` = (sua chave da Groq)
-5. Clique em **Deploy**.
+1. Crie uma conta na Vercel (vercel.com) e conecte seu GitHub.
+2. Suba essa pasta inteira para um repositório no GitHub.
+3. Na Vercel, clique em "Add New Project" e selecione o repositório.
+   A Vercel detecta a pasta `api/` automaticamente e transforma
+   `devotional.js` numa serverless function acessível em `/api/devotional`.
+4. Antes de finalizar o deploy (ou depois, em Project → Settings →
+   Environment Variables), adicione:
+   - **Nome:** `GROQ_API_KEY`
+   - **Valor:** a chave que você copiou do console da Groq
+   - **Environments:** marque Production, Preview e Development
+5. Deploy (ou "Redeploy" se o projeto já existia antes de adicionar a
+   variável — variáveis de ambiente só entram em vigor em deploys novos).
 
-É isso! Seu site agora gera devocionais diários usando a API da Groq.
+Pronto — seu site estará em algo como `https://seu-projeto.vercel.app`,
+e o devocional do dia vai carregar automaticamente na tela "Hoje".
 
-## Como funciona
+## Como funciona o devocional
 
-- **Frontend**: `index.html`, `style.css`, `script.js`
-  - Interface amigável
-  - Integração com [A Bíblia Digital API](https://abibliadigital.com.br/api)
-  - LocalStorage para favoritos, reflexões e cache do devocional
+- Existem 24 temas bíblicos pré-definidos (fé, esperança, paz, amor...),
+  cada um ligado a uma referência específica da Bíblia.
+- O tema do dia é escolhido pelo dia do ano (`dia % 24`), então muda
+  todo dia e se repete a cada ~24 dias.
+- A função busca o texto do versículo na abibliadigital e manda pra
+  API da Groq (modelo `openai/gpt-oss-120b`) gerar uma citação reflexiva
+  + um texto devocional curto (estilo Glorify) conectados ao tema e ao
+  versículo.
+- O navegador guarda o resultado em `localStorage` pelo dia, então o
+  mesmo usuário não gera de novo a cada recarregamento da página
+  (economiza chamadas de API, mesmo sendo gratuita).
 
-- **Backend**: `api/devotional.js`
-  - Roda **só no servidor** (Vercel)
-  - Busca um versículo temático em A Bíblia Digital
-  - Chama a API da Groq (llama-3.1-70b) para gerar citação + reflexão
-  - Retorna tudo em JSON
-  - Cacheia por 1 hora (depois 24h em stale-while-revalidate)
+## Sequência (streak) e calendário
 
-## Temas rotativos
+- Um botão "Concluir devocional de hoje" marca o dia como feito.
+- O 🔥 no topo mostra a sequência real de dias seguidos concluídos.
+- A aba "Sequência" (dentro de Caminho) mostra um calendário mensal
+  com os dias concluídos destacados.
 
-24 temas bíblicos que rotacionam diariamente:
-Fé, Esperança, Paz, Amor, Perseverança, Gratidão, Confiança, Coragem,
-Humildade, Sabedoria, Perdão, Alegria, Descanso, Propósito, Cura,
-Provisão, Proteção, Renovação, Serviço, Gentileza, Paciência,
-Fidelidade, Liberdade, Consolo.
+## Planos de leitura
 
-## Recursos
+- Endpoint separado: `api/plan-reading.js` (`GET /api/plan-reading?plan=<id>&day=<n>`).
+- Dois planos prontos:
+  - **`joao21`** — Evangelho de João, um capítulo por dia (21 dias).
+  - **`ansiedade30`** — 30 versículos curados sobre ansiedade, paz e
+    confiança em Deus.
+- Diferente do devocional diário (que muda todo dia), o conteúdo de um
+  dia de um plano **nunca muda** — por isso o front-end guarda cada dia
+  em cache para sempre (`localStorage`, chave `plano_leitura_<id>_dia_<n>`),
+  sem precisar gerar de novo.
+- O progresso (quais dias já foram concluídos, por plano) fica salvo em
+  `localStorage` na chave `devocional_plan_progress`.
+- Concluir a leitura de um dia de um plano também conta para a
+  sequência geral do app (soma no 🔥 e no calendário).
+- Para adicionar um novo plano: edite o array `PLANS` no `script.js`
+  (metadados/exibição) e o objeto `PLANS_DATA` no `api/plan-reading.js`
+  (referências bíblicas de cada dia).
 
-✅ Devocional diário gerado por IA  
-✅ Bíblia completa (versão NVI)  
-✅ Busca por versículos  
-✅ Favoritos  
-✅ Diário de reflexões  
-✅ Modo escuro  
-✅ Totalmente offline (localStorage)  
-✅ Sem anúncios  
-✅ Código aberto  
+## Possível melhoria futura
 
-## Troubleshooting
-
-- **Erro 500 no devocional?**
-  - Verifique se `GROQ_API_KEY` está configurada no Vercel
-  - Teste sua chave em console.groq.com/docs
-
-- **Versículos não carregam?**
-  - A Bíblia Digital pode estar fora do ar (raro)
-  - Tente F5 depois de alguns minutos
-
-- **Quer mudar os temas?**
-  - Edite `DAILY_THEMES` em `api/devotional.js`
-
-## Licença
-
-MIT — use livremente! 🙏
-
----
-
-Feito com ❤️ e ⚡ tecnologia
+Hoje, cada visitante pode receber uma redação ligeiramente diferente
+do mesmo devocional (a resposta da IA não é 100% idêntica a cada
+chamada). Se quiser que **todos os usuários vejam o texto exatamente
+igual no mesmo dia**, o próximo passo é gerar o devocional uma vez por
+dia via cron job (ex: Vercel Cron) e salvar o resultado num banco tipo
+Vercel KV ou Upstash Redis — aí o endpoint só lê o valor já pronto.
+Posso te ajudar a montar isso quando quiser.
