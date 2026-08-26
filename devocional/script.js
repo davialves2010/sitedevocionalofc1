@@ -107,7 +107,9 @@ const STORAGE = {
     theme: "devocional_theme",
     reflections: "devocional_reflections",
     completedDays: "devocional_completed_days",
-    planProgress: "devocional_plan_progress"
+    planProgress: "devocional_plan_progress",
+    reminderTime: "devocional_reminder_time",
+    reminderEnabled: "devocional_reminder_enabled"
 };
 
 
@@ -1522,3 +1524,150 @@ const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 if (isIos && !isRunningStandalone() && iosInstallTip) {
     iosInstallTip.classList.remove("hidden");
 }
+
+
+/* =========================================================
+   LEMBRETE DIÁRIO
+========================================================= */
+
+const reminderTimeInput = $("reminderTimeInput");
+const reminderToggleButton = $("reminderToggleButton");
+const reminderStatus = $("reminderStatus");
+
+let reminderTimeoutId = null;
+
+function updateReminderUI(enabled) {
+    if (!reminderToggleButton || !reminderStatus) return;
+
+    if (enabled) {
+        reminderToggleButton.textContent = "Desativar";
+        reminderToggleButton.classList.add("active");
+
+        reminderStatus.textContent =
+            `Lembrete ativado para ${reminderTimeInput.value}. Funciona melhor ` +
+            "com o app instalado e aberto em segundo plano — em alguns " +
+            "celulares (principalmente iPhone), o aviso só aparece quando " +
+            "você reabre o app.";
+
+    } else {
+        reminderToggleButton.textContent = "Ativar";
+        reminderToggleButton.classList.remove("active");
+        reminderStatus.textContent = "";
+    }
+}
+
+function showReminderNotification() {
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+    }
+
+    const title = "Seu momento com Deus 🙏";
+    const options = {
+        body: "Seu devocional de hoje está esperando por você.",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png"
+    };
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(title, options);
+        });
+    } else {
+        new Notification(title, options);
+    }
+}
+
+function scheduleNextReminder() {
+    if (!reminderTimeInput) return;
+
+    if (reminderTimeoutId) {
+        clearTimeout(reminderTimeoutId);
+    }
+
+    const [hours, minutes] = reminderTimeInput.value.split(":").map(Number);
+
+    const now = new Date();
+    const next = new Date();
+    next.setHours(hours, minutes, 0, 0);
+
+    if (next <= now) {
+        next.setDate(next.getDate() + 1);
+    }
+
+    const delay = next.getTime() - now.getTime();
+
+    // setTimeout tem um limite máximo (~24 dias); como aqui o intervalo é
+    // sempre de no máximo 1 dia, está sempre dentro do limite seguro.
+    reminderTimeoutId = setTimeout(() => {
+        showReminderNotification();
+        scheduleNextReminder();
+    }, delay);
+}
+
+function loadReminderSettings() {
+    if (!reminderTimeInput || !reminderToggleButton) return;
+
+    const savedTime = localStorage.getItem(STORAGE.reminderTime) || "07:00";
+    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+
+    reminderTimeInput.value = savedTime;
+    updateReminderUI(enabled);
+
+    if (enabled && "Notification" in window && Notification.permission === "granted") {
+        scheduleNextReminder();
+    }
+}
+
+if (reminderToggleButton) {
+    reminderToggleButton.addEventListener("click", async () => {
+        const currentlyEnabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+
+        if (currentlyEnabled) {
+            localStorage.setItem(STORAGE.reminderEnabled, "false");
+
+            if (reminderTimeoutId) {
+                clearTimeout(reminderTimeoutId);
+            }
+
+            updateReminderUI(false);
+            return;
+        }
+
+        if (!("Notification" in window)) {
+            alert("Seu navegador não é compatível com notificações.");
+            return;
+        }
+
+        let permission = Notification.permission;
+
+        if (permission === "default") {
+            permission = await Notification.requestPermission();
+        }
+
+        if (permission !== "granted") {
+            alert("Pra ativar o lembrete, você precisa permitir notificações.");
+            return;
+        }
+
+        localStorage.setItem(STORAGE.reminderTime, reminderTimeInput.value);
+        localStorage.setItem(STORAGE.reminderEnabled, "true");
+
+        updateReminderUI(true);
+        scheduleNextReminder();
+    });
+}
+
+if (reminderTimeInput) {
+    reminderTimeInput.addEventListener("change", () => {
+        localStorage.setItem(STORAGE.reminderTime, reminderTimeInput.value);
+
+        const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+
+        if (enabled) {
+            updateReminderUI(true);
+            scheduleNextReminder();
+        }
+    });
+}
+
+loadReminderSettings();
