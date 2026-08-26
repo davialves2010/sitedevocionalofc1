@@ -36,8 +36,7 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
+self.addEventListener("fetch", (event) => {  const url = new URL(event.request.url);
 
   // Nunca cachear chamadas de API — precisam sempre de dados frescos
   if (url.pathname.startsWith("/api/")) {
@@ -66,6 +65,25 @@ self.addEventListener("fetch", (event) => {
         .catch(() => cachedResponse);
 
       return cachedResponse || networkFetch;
+    })
+  );
+});
+
+// Ao tocar na notificação, foca uma aba já aberta do app ou abre uma nova.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow("/");
+      }
     })
   );
 });
