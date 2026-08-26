@@ -924,6 +924,39 @@ textarea:focus {
 }
 
 /* =========================================
+   LEMBRETE DIÁRIO
+========================================= */
+
+.reminder-card {
+    margin-bottom: 20px;
+}
+
+.reminder-description {
+    margin: 10px 0 4px;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.reminder-card .quick-reference-box input[type="time"] {
+    flex: 1;
+}
+
+#reminderToggleButton.active {
+    background: var(--danger);
+}
+
+#reminderStatus {
+    display: block;
+    margin-top: 10px;
+
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* =========================================
    ESTADO VAZIO
 ========================================= */
 
