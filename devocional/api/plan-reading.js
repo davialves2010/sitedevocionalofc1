@@ -187,7 +187,8 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Não foi possível carregar a leitura de hoje."
+      error: "Não foi possível carregar a leitura de hoje.",
+      debug: error.message
     });
   }
 };
