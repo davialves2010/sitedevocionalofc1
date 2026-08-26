@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -7,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Seu momento diário com Deus.">
     <title>Meu Devocional</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#405646">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Devocional">
+    <link rel="icon" href="./icons/icon-192.png">
 
     <!-- FONTES -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -410,6 +418,15 @@
                     <b>›</b>
                 </button>
 
+                <button id="installAppButton" class="menu-button hidden" type="button">
+                    <span>📲</span>
+                    <div>
+                        <strong>Instalar app</strong>
+                        <small>Adicione à tela inicial do seu aparelho</small>
+                    </div>
+                    <b>›</b>
+                </button>
+
                 <button id="clearDataButton" class="menu-button danger" type="button">
                     <span>🗑️</span>
                     <div>
@@ -420,6 +437,12 @@
                 </button>
 
             </div>
+
+            <p id="iosInstallTip" class="ios-install-tip hidden">
+                📲 Pra instalar no iPhone: toque em <strong>Compartilhar</strong>
+                (o ícone com uma seta pra cima) e depois em
+                <strong>"Adicionar à Tela de Início"</strong>.
+            </p>
 
         </section>
 

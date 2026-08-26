@@ -81,6 +81,23 @@ e o devocional do dia vai carregar automaticamente na tela "Hoje".
   (metadados/exibição) e o objeto `PLANS_DATA` no `api/plan-reading.js`
   (referências bíblicas de cada dia).
 
+## PWA (app instalável)
+
+- `manifest.json` — nome, ícones e cores do app.
+- `service-worker.js` — cacheia o "app shell" (HTML/CSS/JS/ícones) pra
+  abrir rápido e funcionar offline. As chamadas de API nunca são
+  cacheadas por ele — sempre buscam dados frescos.
+- `icons/` — ícones gerados em vários tamanhos (192, 512 e versões
+  "maskable" para Android, além do apple-touch-icon para iOS).
+- No Android/Chrome/Edge, aparece um botão **"Instalar app"** dentro de
+  "Mais" quando o navegador permite a instalação automática.
+- No iPhone (Safari não tem esse recurso automático), aparece uma dica
+  explicando o passo a passo manual: Compartilhar → Adicionar à Tela
+  de Início.
+- Nenhuma configuração extra é necessária na Vercel — `manifest.json`,
+  `service-worker.js` e a pasta `icons/` são arquivos estáticos comuns,
+  servidos automaticamente.
+
 ## Possível melhoria futura
 
 Hoje, cada visitante pode receber uma redação ligeiramente diferente

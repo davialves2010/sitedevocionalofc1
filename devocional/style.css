@@ -910,6 +910,19 @@ textarea:focus {
     color: var(--danger);
 }
 
+.ios-install-tip {
+    margin-top: 16px;
+    padding: 16px 18px;
+
+    border-radius: 18px;
+
+    background: var(--green-light);
+    color: var(--green-dark);
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 /* =========================================
    ESTADO VAZIO
 ========================================= */

@@ -1414,3 +1414,73 @@ updateCompleteButton();
 loadVerse();
 loadBooks();
 loadDevotional();
+
+
+/* =========================================================
+   PWA — SERVICE WORKER
+========================================================= */
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker
+            .register("/service-worker.js")
+            .catch(error => {
+                console.error("Falha ao registrar o service worker:", error);
+            });
+    });
+}
+
+
+/* =========================================================
+   PWA — INSTALAR APP
+========================================================= */
+
+const installAppButton = $("installAppButton");
+const iosInstallTip = $("iosInstallTip");
+
+let deferredInstallPrompt = null;
+
+function isRunningStandalone() {
+    return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true
+    );
+}
+
+window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+
+    if (installAppButton) {
+        installAppButton.classList.remove("hidden");
+    }
+});
+
+if (installAppButton) {
+    installAppButton.addEventListener("click", async () => {
+        if (!deferredInstallPrompt) return;
+
+        deferredInstallPrompt.prompt();
+
+        await deferredInstallPrompt.userChoice;
+
+        deferredInstallPrompt = null;
+        installAppButton.classList.add("hidden");
+    });
+}
+
+window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+
+    if (installAppButton) {
+        installAppButton.classList.add("hidden");
+    }
+});
+
+// iOS Safari não dá suporte a beforeinstallprompt — mostramos uma dica
+// com o passo a passo manual (Compartilhar → Adicionar à Tela de Início).
+const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+if (isIos && !isRunningStandalone() && iosInstallTip) {
+    iosInstallTip.classList.remove("hidden");
+}
