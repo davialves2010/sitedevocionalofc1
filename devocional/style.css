@@ -1530,6 +1530,25 @@ body.dark .navigation {
     font-size: 26px;
 }
 
+.plan-day-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin: 6px 0 14px;
+}
+
+.plan-day-nav h2 {
+    margin: 0;
+    text-align: center;
+}
+
+.calendar-nav:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
 .plan-reading .verse-card,
 .plan-reading .chapter-content {
     margin-bottom: 22px;
