@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -106,6 +107,19 @@
 
             </section>
 
+            <!-- ATALHO PLANOS DE LEITURA -->
+            <section class="prayer-card">
+                <div class="prayer-icon">📅</div>
+
+                <div class="prayer-content">
+                    <span class="section-label">PLANOS DE LEITURA</span>
+                    <h2>Siga uma trilha</h2>
+                    <p>Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.</p>
+                </div>
+
+                <button id="plansShortcutButton">Ver planos</button>
+            </section>
+
             <!-- ORAÇÃO -->
             <section class="prayer-card">
                 <div class="prayer-icon">🙏</div>
@@ -128,6 +142,69 @@
 
                 <button id="noteButton" class="secondary-button">Escrever</button>
             </section>
+
+        </section>
+
+
+        <!-- =====================================================
+             TELA: PLANOS DE LEITURA
+        ====================================================== -->
+        <section id="plansScreen" class="screen">
+
+            <div class="page-header">
+                <span class="small-title">TRILHAS DE LEITURA</span>
+                <h1>Planos</h1>
+            </div>
+
+            <!-- LISTA DE PLANOS -->
+            <div id="plansList" class="plans-list"></div>
+
+            <!-- LEITURA DO DIA -->
+            <div id="planReading" class="plan-reading hidden">
+
+                <button id="planBackButton" class="plan-back-button" type="button">‹ Voltar aos planos</button>
+
+                <div class="plan-reading-header">
+                    <span id="planReadingTitle" class="section-label"></span>
+                    <h2 id="planReadingDayLabel"></h2>
+
+                    <div class="plan-progress-bar">
+                        <div id="planProgressFill" class="plan-progress-fill"></div>
+                    </div>
+                </div>
+
+                <div id="planReadingLoading" class="devotional-loading">
+                    Carregando a leitura de hoje...
+                </div>
+
+                <div id="planReadingContent" class="hidden">
+
+                    <!-- PASSAGEM: VERSÍCULO ÚNICO -->
+                    <div id="planVerseCard" class="verse-card hidden">
+                        <p id="planVerseText" class="verse-text"></p>
+                        <p id="planVerseReference" class="verse-reference"></p>
+                    </div>
+
+                    <!-- PASSAGEM: CAPÍTULO COMPLETO -->
+                    <article id="planChapterCard" class="chapter-content hidden">
+                        <h2 id="planChapterTitle" class="chapter-title"></h2>
+                        <div id="planChapterVerses"></div>
+                    </article>
+
+                    <div class="devotional-reflection">
+                        <h2 id="planDevotionalTitle"></h2>
+                        <div id="planDevotionalParagraphs"></div>
+                    </div>
+
+                    <button id="planCompleteButton" class="devotional-complete-button" type="button">
+                        Concluir dia
+                    </button>
+
+                </div>
+
+                <div id="planReadingError" class="verse-error hidden"></div>
+
+            </div>
 
         </section>
 
@@ -362,6 +439,11 @@
         <button class="nav-item" data-screen="bibleScreen" type="button">
             <span>📖</span>
             <small>Bíblia</small>
+        </button>
+
+        <button class="nav-item" data-screen="plansScreen" type="button">
+            <span>📅</span>
+            <small>Planos</small>
         </button>
 
         <button class="nav-item" data-screen="searchScreen" type="button">
