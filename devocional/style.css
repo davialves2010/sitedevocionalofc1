@@ -1369,3 +1369,170 @@ body.dark .navigation {
 
     font-size: 11px;
 }
+
+/* =========================================
+   PLANOS DE LEITURA
+========================================= */
+
+.plans-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.plan-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    padding: 22px;
+
+    border-radius: 24px;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+
+    box-shadow: var(--shadow);
+}
+
+.plan-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 52px;
+    height: 52px;
+
+    border-radius: 16px;
+
+    background: var(--green-light);
+
+    font-size: 24px;
+}
+
+.plan-card-info {
+    flex: 1;
+}
+
+.plan-card-info strong {
+    display: block;
+    font-family: "Playfair Display", serif;
+    font-size: 19px;
+}
+
+.plan-card-info small {
+    display: block;
+    margin-top: 3px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.plan-card-info p {
+    margin: 10px 0 14px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.plan-progress-bar {
+    width: 100%;
+    height: 8px;
+
+    border-radius: 8px;
+
+    background: var(--background-soft);
+
+    overflow: hidden;
+}
+
+.plan-progress-fill {
+    height: 100%;
+
+    border-radius: 8px;
+
+    background: var(--green);
+
+    transition: width .3s ease;
+}
+
+.plan-progress-label {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.plan-action-button {
+    align-self: center;
+
+    border: 0;
+    border-radius: 14px;
+
+    padding: 10px 16px;
+
+    background: var(--green);
+    color: white;
+
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+.plan-action-button:hover {
+    background: var(--green-dark);
+}
+
+.plan-back-button {
+    margin-bottom: 18px;
+
+    border: 0;
+    background: transparent;
+
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.plan-back-button:hover {
+    color: var(--green-dark);
+}
+
+.plan-reading-header {
+    margin-bottom: 22px;
+}
+
+.plan-reading-header h2 {
+    margin: 6px 0 14px;
+
+    font-family: "Playfair Display", serif;
+    font-size: 26px;
+}
+
+.plan-reading .verse-card,
+.plan-reading .chapter-content {
+    margin-bottom: 22px;
+}
+
+@media(max-width: 600px) {
+
+    .plan-card {
+        flex-wrap: wrap;
+    }
+
+    .plan-action-button {
+        width: 100%;
+    }
+
+    .nav-item {
+        padding: 6px 8px;
+    }
+}
