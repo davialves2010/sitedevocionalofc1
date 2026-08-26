@@ -213,6 +213,15 @@ body.dark .background {
     opacity: .7;
 }
 
+.verse-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    position: relative;
+    z-index: 2;
+}
+
 .favorite {
     border: 0;
     background: transparent;
@@ -376,6 +385,29 @@ body.dark .background {
     color: var(--green-dark);
     cursor: default;
     transform: none;
+}
+
+.share-button {
+    width: 100%;
+    margin-top: 10px;
+
+    padding: 13px 17px;
+
+    border: 1px solid var(--border);
+    border-radius: 15px;
+
+    background: var(--card);
+    color: var(--green-dark);
+
+    font-weight: 600;
+    font-size: 15px;
+
+    cursor: pointer;
+    transition: .2s;
+}
+
+.share-button:hover {
+    background: var(--green-light);
 }
 
 /* =========================================
