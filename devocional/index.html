@@ -126,12 +126,16 @@
 
             <!-- ATALHO PLANOS DE LEITURA -->
             <section class="prayer-card">
-                <div class="prayer-icon">📅</div>
+                <div class="prayer-icon" id="planShortcutIcon">📅</div>
 
                 <div class="prayer-content">
-                    <span class="section-label">PLANOS DE LEITURA</span>
-                    <h2>Siga uma trilha</h2>
-                    <p>Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.</p>
+                    <span class="section-label" id="planShortcutLabel">PLANOS DE LEITURA</span>
+                    <h2 id="planShortcutTitle">Siga uma trilha</h2>
+                    <p id="planShortcutDescription">Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.</p>
+
+                    <div class="plan-progress-bar hidden" id="planShortcutProgressBar">
+                        <div id="planShortcutProgressFill" class="plan-progress-fill"></div>
+                    </div>
                 </div>
 
                 <button id="plansShortcutButton">Ver planos</button>
