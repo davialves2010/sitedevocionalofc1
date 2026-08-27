@@ -1217,9 +1217,80 @@ function renderPlansList() {
     });
 }
 
+let featuredPlanId = null;
+
+function getFeaturedPlan() {
+    const progress = getPlanProgress();
+
+    let candidate = null;
+
+    PLANS.forEach(plan => {
+        const state = progress[plan.id];
+        if (!state || !state.completedDays || !state.completedDays.length) return;
+
+        const isFinished = state.completedDays.length >= plan.duration;
+        if (isFinished) return;
+
+        const lastActivity = state.lastActivityAt ? new Date(state.lastActivityAt).getTime() : 0;
+
+        if (!candidate || lastActivity > candidate.lastActivity) {
+            candidate = { plan, state, lastActivity };
+        }
+    });
+
+    return candidate;
+}
+
+const planShortcutIcon = $("planShortcutIcon");
+const planShortcutLabel = $("planShortcutLabel");
+const planShortcutTitle = $("planShortcutTitle");
+const planShortcutDescription = $("planShortcutDescription");
+const planShortcutProgressBar = $("planShortcutProgressBar");
+const planShortcutProgressFill = $("planShortcutProgressFill");
+
+function renderHomePlanShortcut() {
+    if (!plansShortcutButton) return;
+
+    const featured = getFeaturedPlan();
+
+    if (featured) {
+        const { plan, state } = featured;
+        const nextDay = Math.min(state.completedDays.length + 1, plan.duration);
+
+        featuredPlanId = plan.id;
+
+        planShortcutIcon.textContent = plan.icon;
+        planShortcutLabel.textContent = plan.title.toUpperCase();
+        planShortcutTitle.textContent = `Dia ${nextDay} de ${plan.duration}`;
+        planShortcutDescription.textContent = "Continue de onde você parou.";
+
+        planShortcutProgressFill.style.width =
+            `${Math.min(100, (state.completedDays.length / plan.duration) * 100)}%`;
+
+        planShortcutProgressBar.classList.remove("hidden");
+        plansShortcutButton.textContent = "Continuar";
+
+    } else {
+        featuredPlanId = null;
+
+        planShortcutIcon.textContent = "📅";
+        planShortcutLabel.textContent = "PLANOS DE LEITURA";
+        planShortcutTitle.textContent = "Siga uma trilha";
+        planShortcutDescription.textContent =
+            "Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.";
+
+        planShortcutProgressBar.classList.add("hidden");
+        plansShortcutButton.textContent = "Ver planos";
+    }
+}
+
 if (plansShortcutButton) {
     plansShortcutButton.addEventListener("click", () => {
         document.querySelector('.nav-item[data-screen="plansScreen"]').click();
+
+        if (featuredPlanId) {
+            openPlanReading(featuredPlanId);
+        }
     });
 }
 
@@ -1393,6 +1464,8 @@ function completePlanDay(plan, day) {
         state.completedDays.push(day);
     }
 
+    state.lastActivityAt = new Date().toISOString();
+
     progress[plan.id] = state;
     savePlanProgress(progress);
 
@@ -1401,6 +1474,8 @@ function completePlanDay(plan, day) {
 
     planProgressFill.style.width =
         `${Math.min(100, (state.completedDays.length / plan.duration) * 100)}%`;
+
+    renderHomePlanShortcut();
 
     if (day < plan.duration) {
         loadPlanDay(plan, day + 1);
@@ -1439,6 +1514,7 @@ $("clearDataButton").addEventListener("click", () => {
     renderFavorites();
     renderReflections();
     renderPlansList();
+    renderHomePlanShortcut();
 
     alert("Dados apagados.");
 });
@@ -1452,6 +1528,7 @@ renderFavorites();
 renderReflections();
 renderCalendar();
 renderPlansList();
+renderHomePlanShortcut();
 updateCompleteButton();
 loadVerse();
 loadBooks();
