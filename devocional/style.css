@@ -88,6 +88,28 @@ body.dark .background {
     padding: 35px 25px 120px;
 }
 
+@media (min-width: 900px) {
+
+    body {
+        display: flex;
+        justify-content: center;
+    }
+
+    .app {
+        max-width: 640px;
+        margin: 40px auto 0;
+
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 32px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
+
+        padding: 45px 45px 140px;
+    }
+
+}
+
 /* =========================================
    TELAS
 ========================================= */
@@ -141,12 +163,19 @@ body.dark .background {
 .profile-button {
     width: 48px;
     height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--card);
-    font-size: 22px;
     color: var(--green);
     cursor: pointer;
+}
+
+.profile-button svg {
+    width: 22px;
+    height: 22px;
 }
 
 /* =========================================
@@ -163,11 +192,21 @@ body.dark .background {
 }
 
 .streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
     padding: 8px 13px;
     border-radius: 20px;
     background: var(--card);
     border: 1px solid var(--border);
     backdrop-filter: blur(10px);
+}
+
+.flame-icon {
+    width: 16px;
+    height: 16px;
+    color: #e08a3c;
 }
 
 /* =========================================
@@ -223,12 +262,20 @@ body.dark .background {
 }
 
 .favorite {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     border: 0;
     background: transparent;
     color: white;
-    font-size: 26px;
     cursor: pointer;
     z-index: 2;
+}
+
+.favorite svg {
+    width: 24px;
+    height: 24px;
 }
 
 .favorite.saved {
@@ -267,6 +314,11 @@ body.dark .background {
 .random-button {
     position: relative;
     z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
     margin-top: 25px;
     padding: 10px 15px;
     border: 1px solid rgba(255, 255, 255, .18);
@@ -274,6 +326,11 @@ body.dark .background {
     background: rgba(255, 255, 255, .08);
     color: white;
     cursor: pointer;
+    transition: background .2s;
+}
+
+.random-button:hover {
+    background: rgba(255, 255, 255, .16);
 }
 
 /* =========================================
@@ -390,6 +447,11 @@ body.dark .background {
 .share-button {
     width: 100%;
     margin-top: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
     padding: 13px 17px;
 
@@ -564,6 +626,11 @@ button {
     color: white;
     font-weight: 600;
     cursor: pointer;
+    transition: background .2s;
+}
+
+.quick-reference-box button:hover {
+    background: var(--green-dark);
 }
 
 #referenceStatus {
@@ -707,11 +774,19 @@ textarea:focus {
 
 .search-box button {
     width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 0;
     border-radius: 14px;
     background: var(--green);
     color: white;
     cursor: pointer;
+}
+
+.search-box button svg {
+    width: 20px;
+    height: 20px;
 }
 
 .search-status {
@@ -883,7 +958,9 @@ textarea:focus {
 }
 
 .stats-icon {
-    font-size: 35px;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
 }
 
 .stats-card strong {
@@ -915,6 +992,11 @@ textarea:focus {
     color: var(--text);
     text-align: left;
     cursor: pointer;
+    transition: background .15s;
+}
+
+.menu-button:hover {
+    background: var(--background-soft);
 }
 
 .menu-button:last-child {
@@ -923,6 +1005,22 @@ textarea:focus {
 
 .menu-button > span {
     font-size: 23px;
+}
+
+.menu-button .menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green-dark);
+}
+
+.menu-button .menu-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.menu-button.danger .menu-icon {
+    color: var(--danger);
 }
 
 .menu-button div {
@@ -1117,10 +1215,12 @@ body.dark .navigation {
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    transition: color .2s;
 }
 
-.nav-item span {
-    font-size: 20px;
+.nav-icon {
+    width: 22px;
+    height: 22px;
 }
 
 .nav-item small {
@@ -1229,6 +1329,12 @@ body.dark .navigation {
     color: white;
 }
 
+.tab-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
 .path-content {
     display: none;
 }
@@ -1331,7 +1437,9 @@ body.dark .navigation {
 }
 
 .streak-summary-icon {
-    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
 }
 
 .streak-summary strong {
@@ -1445,12 +1553,19 @@ body.dark .navigation {
 }
 
 .calendar-day.completed::after {
-    content: "🔥";
+    content: "";
 
     position: absolute;
-    bottom: -6px;
+    bottom: 4px;
+    left: 50%;
 
-    font-size: 11px;
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+    background: white;
+
+    transform: translateX(-50%);
 }
 
 /* =========================================
@@ -1574,6 +1689,10 @@ body.dark .navigation {
 .plan-back-button {
     margin-bottom: 18px;
 
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
     border: 0;
     background: transparent;
 
@@ -1632,9 +1751,5 @@ body.dark .navigation {
 
     .plan-action-button {
         width: 100%;
-    }
-
-    .nav-item {
-        padding: 6px 8px;
     }
 }
