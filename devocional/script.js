@@ -111,7 +111,8 @@ const STORAGE = {
     completedDays: "devocional_completed_days",
     planProgress: "devocional_plan_progress",
     reminderTime: "devocional_reminder_time",
-    reminderEnabled: "devocional_reminder_enabled"
+    reminderEnabled: "devocional_reminder_enabled",
+    reminderLastShown: "devocional_reminder_last_shown"
 };
 
 
@@ -1613,8 +1614,6 @@ const reminderTimeInput = $("reminderTimeInput");
 const reminderToggleButton = $("reminderToggleButton");
 const reminderStatus = $("reminderStatus");
 
-let reminderTimeoutId = null;
-
 function updateReminderUI(enabled) {
     if (!reminderToggleButton || !reminderStatus) return;
 
@@ -1626,7 +1625,7 @@ function updateReminderUI(enabled) {
             `Lembrete ativado para ${reminderTimeInput.value}. Funciona melhor ` +
             "com o app instalado e aberto em segundo plano — em alguns " +
             "celulares (principalmente iPhone), o aviso só aparece quando " +
-            "você reabre o app.";
+            "você reabre o app. No máximo 1 aviso por dia.";
 
     } else {
         reminderToggleButton.textContent = "Ativar";
@@ -1656,31 +1655,39 @@ function showReminderNotification() {
     }
 }
 
-function scheduleNextReminder() {
+// Em vez de agendar um setTimeout que se re-agenda sozinho (que pode
+// disparar repetidamente se o navegador atrasar/pausar o timer), a
+// gente checa periodicamente: "já passou do horário hoje E ainda não
+// notifiquei hoje?". Isso garante NO MÁXIMO uma notificação por dia,
+// não importa quantas vezes essa checagem rode.
+function checkReminder() {
     if (!reminderTimeInput) return;
 
-    if (reminderTimeoutId) {
-        clearTimeout(reminderTimeoutId);
+    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+    if (!enabled) return;
+
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
     }
 
-    const [hours, minutes] = reminderTimeInput.value.split(":").map(Number);
+    const savedTime = localStorage.getItem(STORAGE.reminderTime) || "07:00";
+    const [hours, minutes] = savedTime.split(":").map(Number);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return;
 
     const now = new Date();
-    const next = new Date();
-    next.setHours(hours, minutes, 0, 0);
+    const todayKeyValue = dateKey(now);
 
-    if (next <= now) {
-        next.setDate(next.getDate() + 1);
-    }
+    const lastShown = localStorage.getItem(STORAGE.reminderLastShown);
+    if (lastShown === todayKeyValue) return; // já mostrado hoje
 
-    const delay = next.getTime() - now.getTime();
+    const target = new Date();
+    target.setHours(hours, minutes, 0, 0);
 
-    // setTimeout tem um limite máximo (~24 dias); como aqui o intervalo é
-    // sempre de no máximo 1 dia, está sempre dentro do limite seguro.
-    reminderTimeoutId = setTimeout(() => {
+    if (now >= target) {
         showReminderNotification();
-        scheduleNextReminder();
-    }, delay);
+        localStorage.setItem(STORAGE.reminderLastShown, todayKeyValue);
+    }
 }
 
 function loadReminderSettings() {
@@ -1692,9 +1699,10 @@ function loadReminderSettings() {
     reminderTimeInput.value = savedTime;
     updateReminderUI(enabled);
 
-    if (enabled && "Notification" in window && Notification.permission === "granted") {
-        scheduleNextReminder();
-    }
+    // Checa assim que o app abre (cobre o caso de já ter passado do
+    // horário) e depois a cada 30 segundos enquanto o app estiver aberto.
+    checkReminder();
+    setInterval(checkReminder, 30000);
 }
 
 if (reminderToggleButton) {
@@ -1703,11 +1711,6 @@ if (reminderToggleButton) {
 
         if (currentlyEnabled) {
             localStorage.setItem(STORAGE.reminderEnabled, "false");
-
-            if (reminderTimeoutId) {
-                clearTimeout(reminderTimeoutId);
-            }
-
             updateReminderUI(false);
             return;
         }
@@ -1732,7 +1735,7 @@ if (reminderToggleButton) {
         localStorage.setItem(STORAGE.reminderEnabled, "true");
 
         updateReminderUI(true);
-        scheduleNextReminder();
+        checkReminder();
     });
 }
 
@@ -1744,7 +1747,6 @@ if (reminderTimeInput) {
 
         if (enabled) {
             updateReminderUI(true);
-            scheduleNextReminder();
         }
     });
 }
