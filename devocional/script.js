@@ -447,12 +447,22 @@ function isFavorite() {
     return favorites.some(item => item.id === verseId());
 }
 
+const HEART_OUTLINE_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 ' +
+    '5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+
+const HEART_FILLED_SVG =
+    '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 ' +
+    '5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+
 function updateFavoriteButton() {
     if (isFavorite()) {
-        favoriteButton.textContent = "♥";
+        favoriteButton.innerHTML = HEART_FILLED_SVG;
         favoriteButton.classList.add("saved");
     } else {
-        favoriteButton.textContent = "♡";
+        favoriteButton.innerHTML = HEART_OUTLINE_SVG;
         favoriteButton.classList.remove("saved");
     }
 }
@@ -891,12 +901,6 @@ navItems.forEach(button => {
             renderFavorites();
             renderReflections();
         }
-
-        if (screenId === "plansScreen") {
-            planReading.classList.add("hidden");
-            plansList.classList.remove("hidden");
-            renderPlansList();
-        }
     });
 });
 
@@ -921,6 +925,12 @@ pathTabs.forEach(tab => {
 
         if (targetElement) {
             targetElement.classList.add("active-path");
+        }
+
+        if (target === "readingPlans") {
+            planReading.classList.add("hidden");
+            plansList.classList.remove("hidden");
+            renderPlansList();
         }
 
         if (target === "savedVerses") {
@@ -1103,12 +1113,26 @@ function removeReflection(id) {
 
 const themeButton = $("themeButton");
 
+const MOON_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+const SUN_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/>' +
+    '<line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>' +
+    '<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>' +
+    '<line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>' +
+    '<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+
 function loadTheme() {
     const theme = localStorage.getItem(STORAGE.theme);
 
     if (theme === "dark") {
         document.body.classList.add("dark");
-        themeButton.textContent = "☀";
+        themeButton.innerHTML = SUN_SVG;
+    } else {
+        themeButton.innerHTML = MOON_SVG;
     }
 }
 
@@ -1119,7 +1143,7 @@ themeButton.addEventListener("click", () => {
 
     localStorage.setItem(STORAGE.theme, dark ? "dark" : "light");
 
-    themeButton.textContent = dark ? "☀" : "☾";
+    themeButton.innerHTML = dark ? SUN_SVG : MOON_SVG;
 });
 
 loadTheme();
@@ -1287,7 +1311,8 @@ function renderHomePlanShortcut() {
 
 if (plansShortcutButton) {
     plansShortcutButton.addEventListener("click", () => {
-        document.querySelector('.nav-item[data-screen="plansScreen"]').click();
+        document.querySelector('.nav-item[data-screen="pathScreen"]').click();
+        document.querySelector('.paths-tab[data-path="readingPlans"]').click();
 
         if (featuredPlanId) {
             openPlanReading(featuredPlanId);
