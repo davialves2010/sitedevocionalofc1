@@ -452,6 +452,11 @@ body.dark .background {
     line-height: 1.5;
 }
 
+.prayer-content .plan-progress-bar {
+    margin-top: 12px;
+    height: 6px;
+}
+
 .reflection h2,
 .prayer-card h2,
 .note-card h2 {
