@@ -133,7 +133,8 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Não foi possível gerar o devocional de hoje."
+      error: "Não foi possível gerar o devocional de hoje.",
+      debug: error.message
     });
   }
 };
