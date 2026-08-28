@@ -228,6 +228,31 @@ function calculateStreak(completedDays) {
     return count;
 }
 
+function calculateBestStreak(completedDays) {
+    if (!completedDays.size) return 0;
+
+    const sortedDates = [...completedDays]
+        .map(key => new Date(`${key}T00:00:00`))
+        .sort((a, b) => a - b);
+
+    let best = 1;
+    let current = 1;
+
+    for (let i = 1; i < sortedDates.length; i++) {
+        const diffDays = Math.round((sortedDates[i] - sortedDates[i - 1]) / 86400000);
+
+        if (diffDays === 1) {
+            current++;
+        } else if (diffDays > 1) {
+            current = 1;
+        }
+
+        best = Math.max(best, current);
+    }
+
+    return best;
+}
+
 function updateStreakDisplays() {
     const value = calculateStreak(getCompletedDays());
 
@@ -1152,6 +1177,14 @@ function removeFavorite(id) {
 const navItems = document.querySelectorAll(".nav-item");
 const screens = document.querySelectorAll(".screen");
 
+function showScreen(screenId) {
+    screens.forEach(screen => {
+        screen.classList.remove("active-screen");
+    });
+
+    $(screenId).classList.add("active-screen");
+}
+
 navItems.forEach(button => {
     button.addEventListener("click", () => {
         const screenId = button.dataset.screen;
@@ -1159,11 +1192,7 @@ navItems.forEach(button => {
         navItems.forEach(item => item.classList.remove("active"));
         button.classList.add("active");
 
-        screens.forEach(screen => {
-            screen.classList.remove("active-screen");
-        });
-
-        $(screenId).classList.add("active-screen");
+        showScreen(screenId);
 
         if (screenId === "favoritesScreen") {
             renderFavorites();
@@ -1175,6 +1204,22 @@ navItems.forEach(button => {
         }
     });
 });
+
+const moreStatsButton = $("moreStatsButton");
+const statsBackButton = $("statsBackButton");
+
+if (moreStatsButton) {
+    moreStatsButton.addEventListener("click", () => {
+        showScreen("statsScreen");
+        renderStatsScreen();
+    });
+}
+
+if (statsBackButton) {
+    statsBackButton.addEventListener("click", () => {
+        showScreen("moreScreen");
+    });
+}
 
 
 /* =========================================================
@@ -2079,6 +2124,35 @@ function wrapCanvasText(ctx, text, maxWidth) {
     return lines;
 }
 
+function drawShareBackground(ctx, width, height) {
+    // Fundo em degradê, igual ao tema verde do app
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#304637");
+    gradient.addColorStop(1, "#566c59");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Círculo decorativo (mesmo efeito do card do versículo no site)
+    ctx.fillStyle = "rgba(255,255,255,0.07)";
+    ctx.beginPath();
+    ctx.arc(width - 120, height - 200, 280, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
 async function generateShareCanvas({ label, mainText, reference }) {
     const width = 1080;
     const height = 1920;
@@ -2094,18 +2168,7 @@ async function generateShareCanvas({ label, mainText, reference }) {
         await document.fonts.ready;
     }
 
-    // Fundo em degradê, igual ao tema verde do app
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "#304637");
-    gradient.addColorStop(1, "#566c59");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Círculo decorativo (mesmo efeito do card do versículo no site)
-    ctx.fillStyle = "rgba(255,255,255,0.07)";
-    ctx.beginPath();
-    ctx.arc(width - 120, height - 200, 280, 0, Math.PI * 2);
-    ctx.fill();
+    drawShareBackground(ctx, width, height);
 
     ctx.textAlign = "center";
 
@@ -2136,6 +2199,83 @@ async function generateShareCanvas({ label, mainText, reference }) {
     }
 
     // Marca do app no rodapé
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
+    ctx.font = "600 30px 'DM Sans', sans-serif";
+    ctx.fillText("🙏 Meu Devocional", width / 2, height - 100);
+
+    return canvas;
+}
+
+async function generateStatsShareCanvas(stats) {
+    const width = 1080;
+    const height = 1920;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+    }
+
+    drawShareBackground(ctx, width, height);
+
+    ctx.textAlign = "center";
+
+    // Cabeçalho
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "700 30px 'DM Sans', sans-serif";
+    ctx.fillText("MINHA JORNADA", width / 2, 190);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "600 58px 'Playfair Display', serif";
+    ctx.fillText("Meu Devocional", width / 2, 265);
+
+    // Grade de estatísticas: 2 colunas x 3 linhas
+    const items = [
+        { value: stats.currentStreak, label: "sequência atual" },
+        { value: stats.bestStreak, label: "melhor sequência" },
+        { value: stats.totalDays, label: "dias concluídos" },
+        { value: stats.savedVerses, label: "versículos salvos" },
+        { value: stats.reflectionsCount, label: "reflexões escritas" },
+        { value: stats.plansCompleted, label: "planos concluídos" }
+    ];
+
+    const gridTop = 380;
+    const gridBottom = 1540;
+    const gap = 24;
+    const colWidth = (width - 160) / 2;
+    const rowHeight = (gridBottom - gridTop) / 3;
+
+    items.forEach((item, index) => {
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+
+        const cardX = 80 + col * colWidth + gap / 2;
+        const cardY = gridTop + row * rowHeight;
+        const cardW = colWidth - gap;
+        const cardH = rowHeight - gap;
+
+        ctx.fillStyle = "rgba(255,255,255,0.10)";
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 28);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 66px 'Playfair Display', serif";
+        ctx.fillText(String(item.value), cardX + cardW / 2, cardY + cardH / 2 - 4);
+
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.font = "600 23px 'DM Sans', sans-serif";
+        ctx.fillText(item.label, cardX + cardW / 2, cardY + cardH / 2 + 44);
+    });
+
+    // Rodapé
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "600 28px 'DM Sans', sans-serif";
+    ctx.fillText(stats.startDateLabel, width / 2, 1650);
+
     ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.font = "600 30px 'DM Sans', sans-serif";
     ctx.fillText("🙏 Meu Devocional", width / 2, height - 100);
@@ -2229,6 +2369,92 @@ if (shareDevotionalButton) {
             );
         } finally {
             shareDevotionalButton.disabled = false;
+        }
+    });
+}
+
+
+/* =========================================================
+   ESTATÍSTICAS PESSOAIS
+========================================================= */
+
+function getJourneyStartDate() {
+    const completedDaysList = [...getCompletedDays()].sort();
+
+    if (completedDaysList.length) {
+        return completedDaysList[0];
+    }
+
+    const favoriteDates = getFavorites().map(item => item.savedAt).filter(Boolean);
+    const reflectionDates = getReflections().map(item => item.createdAt).filter(Boolean);
+
+    const allDates = [...favoriteDates, ...reflectionDates].sort();
+
+    if (allDates.length) {
+        return allDates[0].slice(0, 10);
+    }
+
+    return dateKey(new Date());
+}
+
+function countCompletedPlans() {
+    return PLANS.filter(plan => {
+        const state = getPlanState(plan.id);
+        return state.completedDays.length >= plan.duration;
+    }).length;
+}
+
+function collectStats() {
+    const completedDays = getCompletedDays();
+
+    const startDateKeyValue = getJourneyStartDate();
+    const startDateFormatted = new Date(`${startDateKeyValue}T00:00:00`).toLocaleDateString(
+        "pt-BR",
+        { day: "numeric", month: "long", year: "numeric" }
+    );
+
+    return {
+        currentStreak: calculateStreak(completedDays),
+        bestStreak: calculateBestStreak(completedDays),
+        totalDays: completedDays.size,
+        savedVerses: getFavorites().length,
+        reflectionsCount: getReflections().length,
+        plansCompleted: countCompletedPlans(),
+        startDateLabel: `Desde ${startDateFormatted}`
+    };
+}
+
+function renderStatsScreen() {
+    const stats = collectStats();
+
+    $("statCurrentStreak").textContent = stats.currentStreak;
+    $("statBestStreak").textContent = stats.bestStreak;
+    $("statTotalDays").textContent = stats.totalDays;
+    $("statSavedVerses").textContent = stats.savedVerses;
+    $("statReflections").textContent = stats.reflectionsCount;
+    $("statPlansCompleted").textContent = stats.plansCompleted;
+
+    $("statsStartDate").textContent = stats.startDateLabel;
+}
+
+const shareStatsButton = $("shareStatsButton");
+
+if (shareStatsButton) {
+    shareStatsButton.addEventListener("click", async () => {
+        shareStatsButton.disabled = true;
+
+        try {
+            const stats = collectStats();
+            const canvas = await generateStatsShareCanvas(stats);
+
+            shareCanvasAsImage(
+                canvas,
+                "minhas-estatisticas.png",
+                "Minhas estatísticas",
+                "Confira minha jornada no Meu Devocional 🙏"
+            );
+        } finally {
+            shareStatsButton.disabled = false;
         }
     });
 }
