@@ -80,6 +80,10 @@ const bookSelect = $("bookSelect");
 const chapterSelect = $("chapterSelect");
 const readChapterButton = $("readChapterButton");
 const chapterContent = $("chapterContent");
+const referenceInput = $("referenceInput");
+const referenceButton = $("referenceButton");
+const referenceStatus = $("referenceStatus");
+const referenceSuggestions = $("referenceSuggestions");
 
 /* BUSCA */
 const searchForm = $("searchForm");
@@ -233,6 +237,17 @@ function updateStreakDisplays() {
     if (calendarStreakCount) {
         calendarStreakCount.textContent = value;
     }
+
+    const isLit = value > 0;
+
+    const homeFlameIcon = $("homeFlameIcon");
+    const statsFlameIcon = document.querySelector(".stats-icon");
+    const summaryFlameIcon = document.querySelector(".streak-summary-icon");
+
+    [homeFlameIcon, statsFlameIcon, summaryFlameIcon].forEach(icon => {
+        if (!icon) return;
+        icon.classList.toggle("lit", isLit);
+    });
 }
 
 function isTodayCompleted() {
@@ -574,6 +589,8 @@ async function loadDevotional() {
    LIVROS
 ========================================================= */
 
+let bibleBooks = [];
+
 async function loadBooks() {
     bookSelect.innerHTML = `<option>Carregando...</option>`;
 
@@ -582,9 +599,15 @@ async function loadBooks() {
 
         bookSelect.innerHTML = "";
 
-        books.forEach(book => {
+        bibleBooks = books.map(book => ({
+            abbrev: book.abbrev.pt,
+            name: book.name,
+            chapters: book.chapters
+        }));
+
+        bibleBooks.forEach(book => {
             const option = document.createElement("option");
-            option.value = book.abbrev.pt;
+            option.value = book.abbrev;
             option.textContent = book.name;
             option.dataset.chapters = book.chapters;
             bookSelect.appendChild(option);
@@ -697,6 +720,255 @@ async function loadChapter() {
 }
 
 readChapterButton.addEventListener("click", loadChapter);
+
+
+/* =========================================================
+   BUSCA AO VIVO POR REFERÊNCIA (livro, capítulo, versículo)
+========================================================= */
+
+function normalizeText(text) {
+    return text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+// Separa "João 3:16" em { bookNamePart: "João", chapter: 3, verse: 16 }
+function parseReferenceInput(rawValue) {
+    const value = rawValue.trim();
+
+    const match = value.match(/^(.*?)\s*(\d+)?\s*(?::\s*(\d+))?$/);
+
+    if (!match) {
+        return { bookNamePart: value, chapter: null, verse: null };
+    }
+
+    const [, bookNamePart, chapter, verse] = match;
+
+    return {
+        bookNamePart: bookNamePart.trim(),
+        chapter: chapter ? Number(chapter) : null,
+        verse: verse ? Number(verse) : null
+    };
+}
+
+function findBookMatches(bookNamePart) {
+    if (!bookNamePart) return [];
+
+    const normalizedQuery = normalizeText(bookNamePart);
+
+    const startsWith = [];
+    const includes = [];
+
+    bibleBooks.forEach(book => {
+        const normalizedName = normalizeText(book.name);
+
+        if (normalizedName.startsWith(normalizedQuery)) {
+            startsWith.push(book);
+        } else if (normalizedName.includes(normalizedQuery)) {
+            includes.push(book);
+        }
+    });
+
+    return [...startsWith, ...includes];
+}
+
+function findExactBook(bookNamePart) {
+    const normalizedQuery = normalizeText(bookNamePart);
+    return bibleBooks.find(book => normalizeText(book.name) === normalizedQuery);
+}
+
+let highlightedSuggestionIndex = -1;
+let currentSuggestions = [];
+
+function renderSuggestions(matches) {
+    currentSuggestions = matches;
+    highlightedSuggestionIndex = -1;
+
+    if (!matches.length) {
+        referenceSuggestions.classList.add("hidden");
+        referenceSuggestions.innerHTML = "";
+        return;
+    }
+
+    referenceSuggestions.innerHTML = "";
+
+    matches.slice(0, 8).forEach(book => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "reference-suggestion";
+
+        const name = document.createElement("span");
+        name.textContent = book.name;
+
+        const chapters = document.createElement("small");
+        chapters.textContent = `${book.chapters} cap.`;
+
+        item.appendChild(name);
+        item.appendChild(chapters);
+
+        item.addEventListener("click", () => {
+            referenceInput.value = `${book.name} `;
+            referenceSuggestions.classList.add("hidden");
+            referenceInput.focus();
+        });
+
+        referenceSuggestions.appendChild(item);
+    });
+
+    referenceSuggestions.classList.remove("hidden");
+}
+
+function updateHighlightedSuggestion() {
+    const items = referenceSuggestions.querySelectorAll(".reference-suggestion");
+
+    items.forEach((item, index) => {
+        item.classList.toggle("highlighted", index === highlightedSuggestionIndex);
+    });
+
+    if (highlightedSuggestionIndex >= 0 && items[highlightedSuggestionIndex]) {
+        items[highlightedSuggestionIndex].scrollIntoView({ block: "nearest" });
+    }
+}
+
+if (referenceInput) {
+    referenceInput.addEventListener("input", () => {
+        if (!bibleBooks.length) return;
+
+        const { bookNamePart, chapter } = parseReferenceInput(referenceInput.value);
+
+        // Só mostra sugestões enquanto ainda faz sentido escolher o livro
+        // (nenhum capítulo digitado ainda, ou o nome digitado não bate
+        // exatamente com nenhum livro).
+        const exactMatch = findExactBook(bookNamePart);
+
+        if (!bookNamePart || (exactMatch && chapter)) {
+            renderSuggestions([]);
+            return;
+        }
+
+        renderSuggestions(findBookMatches(bookNamePart));
+    });
+
+    referenceInput.addEventListener("keydown", event => {
+        if (referenceSuggestions.classList.contains("hidden")) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                goToReference();
+            }
+            return;
+        }
+
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            highlightedSuggestionIndex =
+                Math.min(highlightedSuggestionIndex + 1, currentSuggestions.length - 1);
+            updateHighlightedSuggestion();
+
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            highlightedSuggestionIndex = Math.max(highlightedSuggestionIndex - 1, 0);
+            updateHighlightedSuggestion();
+
+        } else if (event.key === "Enter") {
+            event.preventDefault();
+
+            if (highlightedSuggestionIndex >= 0 && currentSuggestions[highlightedSuggestionIndex]) {
+                const book = currentSuggestions[highlightedSuggestionIndex];
+                referenceInput.value = `${book.name} `;
+                renderSuggestions([]);
+                referenceInput.focus();
+            } else {
+                renderSuggestions([]);
+                goToReference();
+            }
+
+        } else if (event.key === "Escape") {
+            renderSuggestions([]);
+        }
+    });
+
+    document.addEventListener("click", event => {
+        if (
+            event.target !== referenceInput &&
+            !referenceSuggestions.contains(event.target)
+        ) {
+            renderSuggestions([]);
+        }
+    });
+}
+
+async function goToReference() {
+    if (!bibleBooks.length) {
+        referenceStatus.textContent = "Aguarde os livros carregarem e tente de novo.";
+        return;
+    }
+
+    const { bookNamePart, chapter, verse } = parseReferenceInput(referenceInput.value);
+
+    if (!bookNamePart) {
+        referenceStatus.textContent = "Digite um livro, ex: João 3:16.";
+        return;
+    }
+
+    const matches = findBookMatches(bookNamePart);
+    const book = findExactBook(bookNamePart) || matches[0];
+
+    if (!book) {
+        referenceStatus.textContent = `Livro "${bookNamePart}" não encontrado.`;
+        return;
+    }
+
+    if (!chapter) {
+        referenceStatus.textContent = `Informe o capítulo. Ex: ${book.name} 3.`;
+        return;
+    }
+
+    if (chapter > book.chapters) {
+        referenceStatus.textContent = `${book.name} só tem ${book.chapters} capítulos.`;
+        return;
+    }
+
+    referenceStatus.textContent = `Carregando ${book.name} ${chapter}${verse ? ":" + verse : ""}...`;
+
+    bookSelect.value = book.abbrev;
+    loadChapters();
+    chapterSelect.value = String(chapter);
+
+    await loadChapter();
+
+    referenceStatus.textContent = "";
+
+    chapterContent.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (verse) {
+        const verseElements = chapterContent.querySelectorAll(".bible-verse");
+
+        const targetVerse = Array.from(verseElements).find(element => {
+            const number = element.querySelector(".verse-number");
+            return number && Number(number.textContent) === verse;
+        });
+
+        if (targetVerse) {
+            setTimeout(() => {
+                targetVerse.scrollIntoView({ behavior: "smooth", block: "center" });
+                targetVerse.classList.add("verse-jump-highlight");
+
+                setTimeout(() => {
+                    targetVerse.classList.remove("verse-jump-highlight");
+                }, 2400);
+            }, 300);
+        }
+    }
+}
+
+if (referenceButton) {
+    referenceButton.addEventListener("click", () => {
+        renderSuggestions([]);
+        goToReference();
+    });
+}
 
 
 /* =========================================================
