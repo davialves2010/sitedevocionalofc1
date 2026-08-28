@@ -470,6 +470,15 @@
                     <b>›</b>
                 </button>
 
+                <button id="moreStatsButton" class="menu-button" type="button" data-screen="statsScreen">
+                    <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                    <div>
+                        <strong>Minhas estatísticas</strong>
+                        <small>Veja sua jornada até aqui</small>
+                    </div>
+                    <b>›</b>
+                </button>
+
                 <button id="installAppButton" class="menu-button hidden" type="button">
                     <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
                     <div>
@@ -495,6 +504,71 @@
                 (o ícone com uma seta pra cima) e depois em
                 <strong>"Adicionar à Tela de Início"</strong>.
             </p>
+
+        </section>
+
+
+        <!-- =====================================================
+             TELA: ESTATÍSTICAS
+        ====================================================== -->
+        <section id="statsScreen" class="screen">
+
+            <div class="page-header">
+                <button id="statsBackButton" class="plan-back-button" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+                    Voltar
+                </button>
+
+                <span class="small-title">SEU PROGRESSO</span>
+                <h1>Estatísticas</h1>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                    <strong id="statCurrentStreak">0</strong>
+                    <span>sequência atual</span>
+                </div>
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M5 4H3a2 2 0 0 0 0 4h2"/><path d="M19 4h2a2 2 0 0 1 0 4h-2"/></svg>
+                    <strong id="statBestStreak">0</strong>
+                    <span>melhor sequência</span>
+                </div>
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+                    <strong id="statTotalDays">0</strong>
+                    <span>dias concluídos</span>
+                </div>
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    <strong id="statSavedVerses">0</strong>
+                    <span>versículos salvos</span>
+                </div>
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    <strong id="statReflections">0</strong>
+                    <span>reflexões escritas</span>
+                </div>
+
+                <div class="stat-block">
+                    <svg class="stat-block-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 8 10 16 8 13"/></svg>
+                    <strong id="statPlansCompleted">0</strong>
+                    <span>planos concluídos</span>
+                </div>
+
+            </div>
+
+            <p id="statsStartDate" class="stats-start-date"></p>
+
+            <button id="shareStatsButton" class="share-button" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartilhar minhas estatísticas
+            </button>
 
         </section>
 
