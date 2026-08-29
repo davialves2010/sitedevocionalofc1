@@ -1844,14 +1844,7 @@ function completePlanDay(plan, day) {
    LIMPAR DADOS
 ========================================================= */
 
-$("clearDataButton").addEventListener("click", () => {
-    const confirmed = confirm(
-        "Deseja realmente apagar seus favoritos, sequência, reflexões e o " +
-        "progresso dos seus planos de leitura?"
-    );
-
-    if (!confirmed) return;
-
+function clearAllLocalData() {
     localStorage.removeItem(STORAGE.favorites);
     localStorage.removeItem(STORAGE.streak);
     localStorage.removeItem(STORAGE.reflections);
@@ -1869,6 +1862,17 @@ $("clearDataButton").addEventListener("click", () => {
     renderReflections();
     renderPlansList();
     renderHomePlanShortcut();
+}
+
+$("clearDataButton").addEventListener("click", () => {
+    const confirmed = confirm(
+        "Deseja realmente apagar seus favoritos, sequência, reflexões e o " +
+        "progresso dos seus planos de leitura?"
+    );
+
+    if (!confirmed) return;
+
+    clearAllLocalData();
 
     alert("Dados apagados.");
 });
@@ -2548,6 +2552,7 @@ async function loginAccount(email, password) {
 
 function logoutAccount() {
     clearAuthToken();
+    clearAllLocalData();
     updateAccountUI(null);
 }
 
