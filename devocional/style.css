@@ -1143,15 +1143,57 @@ textarea:focus {
    MAIS
 ========================================= */
 
+.settings-section {
+    margin-bottom: 26px;
+}
+
+.settings-section-title {
+    display: block;
+    margin-bottom: 12px;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+
+    color: var(--muted);
+}
+
 .stats-card {
+    width: 100%;
+
     display: flex;
     align-items: center;
     gap: 18px;
     padding: 25px;
+
+    border: 0;
     border-radius: 24px;
+
     background: linear-gradient(135deg, var(--green-dark), var(--green));
     color: white;
+
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
     box-shadow: var(--shadow);
+
+    transition: transform .2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-card-info {
+    flex: 1;
+}
+
+.stats-card-chevron {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: .7;
 }
 
 .stats-icon {
@@ -1169,17 +1211,17 @@ textarea:focus {
     animation: flicker 1.6s ease-in-out infinite;
 }
 
-.stats-card strong {
+.stats-card-info strong {
     display: block;
     font-size: 32px;
 }
 
-.stats-card span {
+.stats-card-info span {
     opacity: .75;
+    font-size: 13px;
 }
 
 .menu-card {
-    margin-top: 20px;
     border-radius: 24px;
     overflow: hidden;
     background: var(--card);
