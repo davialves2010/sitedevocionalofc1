@@ -1247,6 +1247,65 @@ textarea:focus {
 }
 
 /* =========================================
+   CONTA (LOGIN / CADASTRO)
+========================================= */
+
+.account-card {
+    margin-bottom: 20px;
+}
+
+.account-card .primary-button,
+.account-card .secondary-button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 4px;
+}
+
+.auth-tab {
+    flex: 1;
+
+    padding: 11px;
+
+    border: 0;
+    border-radius: 13px;
+
+    background: var(--background-soft);
+    color: var(--muted);
+
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+
+    cursor: pointer;
+    transition: .2s;
+}
+
+.auth-tab.active {
+    background: var(--green);
+    color: white;
+}
+
+#authForm label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 7px;
+
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+#authSubmitButton {
+    width: 100%;
+    margin-top: 22px;
+}
+
+/* =========================================
    ESTADO VAZIO
 ========================================= */
 
