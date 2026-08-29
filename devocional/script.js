@@ -4,6 +4,10 @@
 
 const API_URL = "https://abibliadigital.api.br/api";
 
+// URL do backend próprio (Express + MongoDB, hospedado no Render).
+// Se você renomear/recriar o serviço no Render, atualize essa URL.
+const BACKEND_URL = "https://site-devocional-teste-backend.onrender.com";
+
 let currentVersion = "nvi";
 
 let currentVerse = {
@@ -116,7 +120,8 @@ const STORAGE = {
     planProgress: "devocional_plan_progress",
     reminderTime: "devocional_reminder_time",
     reminderEnabled: "devocional_reminder_enabled",
-    reminderLastShown: "devocional_reminder_last_shown"
+    reminderLastShown: "devocional_reminder_last_shown",
+    authToken: "devocional_auth_token"
 };
 
 
@@ -158,6 +163,7 @@ function getFavorites() {
 
 function saveFavorites(favorites) {
     localStorage.setItem(STORAGE.favorites, JSON.stringify(favorites));
+    scheduleCloudSync();
 }
 
 
@@ -171,6 +177,7 @@ function getReflections() {
 
 function saveReflections(reflections) {
     localStorage.setItem(STORAGE.reflections, JSON.stringify(reflections));
+    scheduleCloudSync();
 }
 
 
@@ -208,6 +215,7 @@ function getCompletedDays() {
 
 function saveCompletedDays(daysSet) {
     localStorage.setItem(STORAGE.completedDays, JSON.stringify([...daysSet]));
+    scheduleCloudSync();
 }
 
 function calculateStreak(completedDays) {
@@ -1461,6 +1469,8 @@ themeButton.addEventListener("click", () => {
     localStorage.setItem(STORAGE.theme, dark ? "dark" : "light");
 
     themeButton.innerHTML = dark ? SUN_SVG : MOON_SVG;
+
+    scheduleCloudSync();
 });
 
 loadTheme();
@@ -1476,6 +1486,7 @@ function getPlanProgress() {
 
 function savePlanProgress(progress) {
     localStorage.setItem(STORAGE.planProgress, JSON.stringify(progress));
+    scheduleCloudSync();
 }
 
 function getPlanState(planId) {
@@ -2054,6 +2065,7 @@ if (reminderToggleButton) {
         if (currentlyEnabled) {
             localStorage.setItem(STORAGE.reminderEnabled, "false");
             updateReminderUI(false);
+            scheduleCloudSync();
             return;
         }
 
@@ -2078,6 +2090,7 @@ if (reminderToggleButton) {
 
         updateReminderUI(true);
         checkReminder();
+        scheduleCloudSync();
     });
 }
 
@@ -2090,6 +2103,8 @@ if (reminderTimeInput) {
         if (enabled) {
             updateReminderUI(true);
         }
+
+        scheduleCloudSync();
     });
 }
 
@@ -2458,3 +2473,340 @@ if (shareStatsButton) {
         }
     });
 }
+
+
+/* =========================================================
+   CONTA — TOKEN E CHAMADAS AO BACKEND
+========================================================= */
+
+function getAuthToken() {
+    return localStorage.getItem(STORAGE.authToken);
+}
+
+function setAuthToken(token) {
+    localStorage.setItem(STORAGE.authToken, token);
+}
+
+function clearAuthToken() {
+    localStorage.removeItem(STORAGE.authToken);
+}
+
+function isLoggedIn() {
+    return Boolean(getAuthToken());
+}
+
+async function apiRequest(path, options = {}) {
+    const token = getAuthToken();
+
+    const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+    };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${BACKEND_URL}${path}`, {
+        ...options,
+        headers
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || `Erro HTTP ${response.status}`);
+    }
+
+    return data;
+}
+
+
+/* =========================================================
+   CONTA — REGISTRO, LOGIN, LOGOUT
+========================================================= */
+
+async function registerAccount(name, email, password) {
+    const data = await apiRequest("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ name, email, password })
+    });
+
+    setAuthToken(data.token);
+    return data.user;
+}
+
+async function loginAccount(email, password) {
+    const data = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password })
+    });
+
+    setAuthToken(data.token);
+    return data.user;
+}
+
+function logoutAccount() {
+    clearAuthToken();
+    updateAccountUI(null);
+}
+
+
+/* =========================================================
+   CONTA — SINCRONIZAÇÃO COM A NUVEM
+========================================================= */
+
+function collectLocalDataSnapshot() {
+    return {
+        favorites: getFavorites(),
+        reflections: getReflections(),
+        completedDays: [...getCompletedDays()],
+        planProgress: getPlanProgress(),
+        reminderTime: localStorage.getItem(STORAGE.reminderTime) || "07:00",
+        reminderEnabled: localStorage.getItem(STORAGE.reminderEnabled) === "true",
+        theme: document.body.classList.contains("dark") ? "dark" : "light"
+    };
+}
+
+function applyCloudDataSnapshot(data) {
+    if (data.favorites) saveFavorites(data.favorites);
+    if (data.reflections) saveReflections(data.reflections);
+    if (data.completedDays) saveCompletedDays(new Set(data.completedDays));
+    if (data.planProgress) savePlanProgress(data.planProgress);
+
+    if (data.reminderTime) {
+        localStorage.setItem(STORAGE.reminderTime, data.reminderTime);
+    }
+
+    if (typeof data.reminderEnabled === "boolean") {
+        localStorage.setItem(STORAGE.reminderEnabled, String(data.reminderEnabled));
+    }
+
+    if (data.theme === "dark") {
+        document.body.classList.add("dark");
+        localStorage.setItem(STORAGE.theme, "dark");
+    } else if (data.theme === "light") {
+        document.body.classList.remove("dark");
+        localStorage.setItem(STORAGE.theme, "light");
+    }
+
+    // Atualiza tudo que depende desses dados na tela
+    renderFavorites();
+    renderReflections();
+    renderCalendar();
+    renderPlansList();
+    renderHomePlanShortcut();
+    updateStreakDisplays();
+    updateCompleteButton();
+    loadTheme();
+
+    if (reminderTimeInput) {
+        reminderTimeInput.value = localStorage.getItem(STORAGE.reminderTime) || "07:00";
+        updateReminderUI(localStorage.getItem(STORAGE.reminderEnabled) === "true");
+    }
+}
+
+function isCloudDataEmpty(data) {
+    return (
+        (!data.favorites || !data.favorites.length) &&
+        (!data.reflections || !data.reflections.length) &&
+        (!data.completedDays || !data.completedDays.length) &&
+        (!data.planProgress || !Object.keys(data.planProgress).length)
+    );
+}
+
+async function syncAfterLogin() {
+    try {
+        const { data } = await apiRequest("/api/data", { method: "GET" });
+
+        if (isCloudDataEmpty(data)) {
+            // Conta nova (ou ainda vazia na nuvem) — envia o que já
+            // existe localmente pra "semear" a conta.
+            await apiRequest("/api/data", {
+                method: "PUT",
+                body: JSON.stringify(collectLocalDataSnapshot())
+            });
+        } else {
+            // Já existem dados salvos na nuvem — eles prevalecem.
+            applyCloudDataSnapshot(data);
+        }
+    } catch (error) {
+        console.error("Erro ao sincronizar após login:", error);
+    }
+}
+
+let cloudSyncTimeoutId = null;
+
+function scheduleCloudSync() {
+    if (!isLoggedIn()) return;
+
+    if (cloudSyncTimeoutId) {
+        clearTimeout(cloudSyncTimeoutId);
+    }
+
+    cloudSyncTimeoutId = setTimeout(async () => {
+        try {
+            await apiRequest("/api/data", {
+                method: "PUT",
+                body: JSON.stringify(collectLocalDataSnapshot())
+            });
+        } catch (error) {
+            console.error("Erro ao sincronizar com a nuvem:", error);
+        }
+    }, 1500);
+}
+
+
+/* =========================================================
+   CONTA — INTERFACE (MODAL E CARD EM "MAIS")
+========================================================= */
+
+const openAuthModalButton = $("openAuthModalButton");
+const authModal = $("authModal");
+const closeAuthModalButton = $("closeAuthModal");
+const authTabLogin = $("authTabLogin");
+const authTabRegister = $("authTabRegister");
+const authNameField = $("authNameField");
+const authNameInput = $("authNameInput");
+const authEmailInput = $("authEmailInput");
+const authPasswordInput = $("authPasswordInput");
+const authForm = $("authForm");
+const authError = $("authError");
+const authSubmitButton = $("authSubmitButton");
+const authModalTitle = $("authModalTitle");
+const accountLoggedOut = $("accountLoggedOut");
+const accountLoggedIn = $("accountLoggedIn");
+const accountUserName = $("accountUserName");
+const logoutButton = $("logoutButton");
+
+let authMode = "login";
+
+function updateAccountUI(user) {
+    if (!accountLoggedOut || !accountLoggedIn) return;
+
+    if (user) {
+        accountLoggedOut.classList.add("hidden");
+        accountLoggedIn.classList.remove("hidden");
+        accountUserName.textContent = user.name;
+    } else {
+        accountLoggedOut.classList.remove("hidden");
+        accountLoggedIn.classList.add("hidden");
+    }
+}
+
+function setAuthMode(mode) {
+    authMode = mode;
+
+    if (mode === "login") {
+        authTabLogin.classList.add("active");
+        authTabRegister.classList.remove("active");
+        authNameField.classList.add("hidden");
+        authModalTitle.textContent = "Entrar";
+        authSubmitButton.textContent = "Entrar";
+    } else {
+        authTabRegister.classList.add("active");
+        authTabLogin.classList.remove("active");
+        authNameField.classList.remove("hidden");
+        authModalTitle.textContent = "Criar conta";
+        authSubmitButton.textContent = "Criar conta";
+    }
+
+    authError.classList.add("hidden");
+}
+
+function openAuthModal() {
+    setAuthMode("login");
+    authModal.classList.remove("hidden");
+}
+
+function closeAuthModal() {
+    authModal.classList.add("hidden");
+}
+
+if (openAuthModalButton) {
+    openAuthModalButton.addEventListener("click", openAuthModal);
+}
+
+if (closeAuthModalButton) {
+    closeAuthModalButton.addEventListener("click", closeAuthModal);
+}
+
+if (authTabLogin) {
+    authTabLogin.addEventListener("click", () => setAuthMode("login"));
+}
+
+if (authTabRegister) {
+    authTabRegister.addEventListener("click", () => setAuthMode("register"));
+}
+
+if (authModal) {
+    authModal.addEventListener("click", event => {
+        if (event.target === authModal) closeAuthModal();
+    });
+}
+
+if (authForm) {
+    authForm.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        authError.classList.add("hidden");
+        authSubmitButton.disabled = true;
+
+        try {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+
+            let user;
+
+            if (authMode === "register") {
+                const name = authNameInput.value.trim();
+
+                if (!name) {
+                    throw new Error("Digite seu nome.");
+                }
+
+                user = await registerAccount(name, email, password);
+            } else {
+                user = await loginAccount(email, password);
+            }
+
+            authForm.reset();
+            closeAuthModal();
+
+            updateAccountUI(user);
+            await syncAfterLogin();
+
+        } catch (error) {
+            authError.textContent = error.message || "Não foi possível continuar.";
+            authError.classList.remove("hidden");
+        } finally {
+            authSubmitButton.disabled = false;
+        }
+    });
+}
+
+if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+        logoutAccount();
+    });
+}
+
+async function checkExistingSession() {
+    if (!isLoggedIn()) {
+        updateAccountUI(null);
+        return;
+    }
+
+    try {
+        const { user } = await apiRequest("/api/auth/me", { method: "GET" });
+        updateAccountUI(user);
+        await syncAfterLogin();
+
+    } catch (error) {
+        console.error("Sessão expirada ou inválida:", error);
+        clearAuthToken();
+        updateAccountUI(null);
+    }
+}
+
+checkExistingSession();
