@@ -1287,7 +1287,6 @@ function closePrayer() {
 }
 
 $("prayerButton").addEventListener("click", openPrayer);
-$("morePrayerButton").addEventListener("click", openPrayer);
 $("closePrayerModal").addEventListener("click", closePrayer);
 
 prayerModal.addEventListener("click", event => {
@@ -1311,7 +1310,6 @@ function closeNote() {
 }
 
 $("noteButton").addEventListener("click", openNote);
-$("moreNoteButton").addEventListener("click", openNote);
 $("closeNoteModal").addEventListener("click", closeNote);
 
 
