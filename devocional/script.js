@@ -2551,6 +2551,11 @@ async function loginAccount(email, password) {
 }
 
 function logoutAccount() {
+    if (cloudSyncTimeoutId) {
+        clearTimeout(cloudSyncTimeoutId);
+        cloudSyncTimeoutId = null;
+    }
+
     clearAuthToken();
     clearAllLocalData();
     updateAccountUI(null);
