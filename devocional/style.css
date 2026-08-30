@@ -438,27 +438,6 @@ body.dark .background {
 .devotional-complete-button {
     width: 100%;
     margin-top: 6px;
-    padding: 14px 17px;
-    border: 0;
-    border-radius: 15px;
-    background: var(--green);
-    color: white;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: .2s;
-}
-
-.devotional-complete-button:hover:not(:disabled) {
-    background: var(--green-dark);
-    transform: translateY(-2px);
-}
-
-.devotional-complete-button:disabled {
-    background: var(--green-light);
-    color: var(--green-dark);
-    cursor: default;
-    transform: none;
 }
 
 .share-button {
@@ -469,24 +448,6 @@ body.dark .background {
     align-items: center;
     justify-content: center;
     gap: 8px;
-
-    padding: 13px 17px;
-
-    border: 1px solid var(--border);
-    border-radius: 15px;
-
-    background: var(--card);
-    color: var(--green-dark);
-
-    font-weight: 600;
-    font-size: 15px;
-
-    cursor: pointer;
-    transition: .2s;
-}
-
-.share-button:hover {
-    background: var(--green-light);
 }
 
 /* =========================================
@@ -551,31 +512,72 @@ button {
     font-family: inherit;
 }
 
+/* =========================================
+   SISTEMA DE BOTÕES — 3 VARIANTES CLARAS
+   (primário / secundário / perigo)
+
+   Todos os botões de ação de texto do site usam um destes três
+   conjuntos de tokens visuais (cor, raio, peso da fonte, tamanho),
+   mesmo mantendo nomes de classe diferentes por contexto histórico.
+========================================= */
+
 #plansShortcutButton,
-.primary-button {
+.primary-button,
+.devotional-complete-button,
+#referenceButton,
+.quick-reference-box button {
     border: 0;
     border-radius: 15px;
-    padding: 12px 17px;
+    padding: 13px 18px;
     color: white;
     background: var(--green);
     cursor: pointer;
     font-weight: 600;
+    font-size: 15px;
     transition: .2s;
 }
 
 #plansShortcutButton:hover,
-.primary-button:hover {
+.primary-button:hover,
+.devotional-complete-button:hover:not(:disabled),
+#referenceButton:hover,
+.quick-reference-box button:hover {
     background: var(--green-dark);
     transform: translateY(-2px);
 }
 
-.secondary-button {
+.devotional-complete-button:disabled {
+    background: var(--green-light);
+    color: var(--green-dark);
+    cursor: default;
+    transform: none;
+}
+
+.secondary-button,
+.share-button {
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 11px 16px;
+    border-radius: 15px;
+    padding: 13px 18px;
     color: var(--green-dark);
     background: var(--card);
     cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    transition: .2s;
+}
+
+.secondary-button:hover,
+.share-button:hover {
+    background: var(--green-light);
+}
+
+#reminderToggleButton.active {
+    background: var(--danger);
+}
+
+#reminderToggleButton.active:hover {
+    filter: brightness(.92);
+    background: var(--danger);
 }
 
 /* =========================================
@@ -747,21 +749,6 @@ button {
 
 .quick-reference-box input {
     flex: 1;
-}
-
-.quick-reference-box button {
-    border: 0;
-    border-radius: 14px;
-    padding: 0 20px;
-    background: var(--green);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .2s;
-}
-
-.quick-reference-box button:hover {
-    background: var(--green-dark);
 }
 
 #referenceStatus {
@@ -1324,10 +1311,6 @@ textarea:focus {
 
 .reminder-card .quick-reference-box input[type="time"] {
     flex: 1;
-}
-
-#reminderToggleButton.active {
-    background: var(--danger);
 }
 
 #reminderStatus {
