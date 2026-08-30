@@ -721,11 +721,11 @@ async function loadChapter() {
 
             const saveButton = document.createElement("button");
             saveButton.className = "small-action";
-            saveButton.textContent = "♡ Salvar";
+            saveButton.innerHTML = `${HEART_OUTLINE_SVG} Salvar`;
 
             saveButton.addEventListener("click", () => {
                 saveVerseFromChapter(data, verse);
-                saveButton.textContent = "♥ Salvo";
+                saveButton.innerHTML = `${HEART_FILLED_SVG} Salvo`;
             });
 
             actions.appendChild(saveButton);
@@ -744,7 +744,7 @@ async function loadChapter() {
 
         chapterContent.innerHTML = `
             <div class="empty-state">
-                <span>⚠️</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                 <h2>Não foi possível carregar</h2>
                 <p>Tente novamente em alguns instantes.</p>
             </div>
@@ -1085,7 +1085,7 @@ searchForm.addEventListener("submit", async event => {
         if (!data.verses || !data.verses.length) {
             searchResults.innerHTML = `
                 <div class="empty-state">
-                    <span>🔎</span>
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                     <h2>Nada encontrado</h2>
                     <p>Tente outra palavra.</p>
                 </div>
@@ -1128,7 +1128,7 @@ function renderFavorites() {
     if (!favorites.length) {
         favoritesList.innerHTML = `
             <div class="empty-state">
-                <span>♡</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
                 <h2>Nenhum versículo salvo</h2>
                 <p>Toque no coração de um versículo para salvá-lo.</p>
             </div>
@@ -1364,7 +1364,7 @@ function renderReflections() {
     if (!reflections.length) {
         reflectionsList.innerHTML = `
             <div class="reflections-empty">
-                <span>📝</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></span>
                 <h2>Nenhuma reflexão ainda</h2>
                 <p>Escreva sobre o que Deus falou com você hoje.</p>
             </div>
