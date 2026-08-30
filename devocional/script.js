@@ -690,7 +690,25 @@ async function loadChapter() {
     const book = bookSelect.value;
     const chapter = chapterSelect.value;
 
-    chapterContent.innerHTML = `<div class="loading">Carregando capítulo...</div>`;
+    chapterContent.innerHTML = `
+        <div class="skeleton skeleton-line w-35" style="height: 22px; margin-bottom: 22px;"></div>
+        <div class="skeleton-verse">
+            <div class="skeleton"></div>
+            <div class="skeleton skeleton-line w-90" style="margin-bottom: 0;"></div>
+        </div>
+        <div class="skeleton-verse">
+            <div class="skeleton"></div>
+            <div class="skeleton skeleton-line w-70" style="margin-bottom: 0;"></div>
+        </div>
+        <div class="skeleton-verse">
+            <div class="skeleton"></div>
+            <div class="skeleton skeleton-line w-100" style="margin-bottom: 0;"></div>
+        </div>
+        <div class="skeleton-verse">
+            <div class="skeleton"></div>
+            <div class="skeleton skeleton-line w-50" style="margin-bottom: 0;"></div>
+        </div>
+    `;
 
     try {
         const data = await apiGet(`/verses/${currentVersion}/${book}/${chapter}`);
