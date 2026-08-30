@@ -359,9 +359,59 @@ body.dark .background {
 }
 
 .devotional-loading {
-    padding: 30px 5px;
+    padding: 6px 5px;
     color: var(--muted);
     font-size: 14px;
+}
+
+/* =========================================
+   SKELETON (CARREGAMENTO)
+========================================= */
+
+@keyframes skeletonPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .45;
+    }
+}
+
+.skeleton {
+    background: var(--background-soft);
+    border-radius: 12px;
+    animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-block {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.skeleton-line {
+    height: 13px;
+    margin-bottom: 10px;
+}
+
+.skeleton-line.w-100 { width: 100%; }
+.skeleton-line.w-90  { width: 90%; }
+.skeleton-line.w-70  { width: 70%; }
+.skeleton-line.w-50  { width: 50%; }
+.skeleton-line.w-35  { width: 35%; }
+
+.skeleton-verse {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+}
+
+.skeleton-verse .skeleton {
+    height: 13px;
+}
+
+.skeleton-verse .skeleton:first-child {
+    width: 20px;
+    flex-shrink: 0;
 }
 
 .devotional-quote {
