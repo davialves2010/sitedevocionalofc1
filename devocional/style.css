@@ -926,12 +926,21 @@ textarea:focus {
 }
 
 .small-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
     border: 0;
     border-radius: 10px;
     padding: 6px 9px;
     background: var(--green-light);
     color: var(--green-dark);
     cursor: pointer;
+}
+
+.small-action svg {
+    width: 13px;
+    height: 13px;
 }
 
 .small-action:hover {
@@ -1392,9 +1401,23 @@ textarea:focus {
 }
 
 .empty-state span {
-    display: block;
-    margin-bottom: 15px;
-    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+
+    border-radius: 20px;
+
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+.empty-state span svg {
+    width: 30px;
+    height: 30px;
 }
 
 .empty-state h2 {
@@ -1681,9 +1704,23 @@ body.dark .navigation {
 }
 
 .reflections-empty span {
-    display: block;
-    margin-bottom: 15px;
-    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+
+    border-radius: 20px;
+
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+.reflections-empty span svg {
+    width: 30px;
+    height: 30px;
 }
 
 .reflections-empty h2 {
