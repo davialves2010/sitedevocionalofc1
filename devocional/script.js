@@ -10,7 +10,7 @@ const BACKEND_URL = "https://site-devocional-teste-backend.onrender.com";
 
 // Client ID do "Continuar com Google" (console.cloud.google.com).
 // Precisa ser o MESMO valor configurado como GOOGLE_CLIENT_ID no backend.
-const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "1051085437418-i3465u5bid5gc4pslirs2tam5kfkvr30.apps.googleusercontent.com";
 
 let currentVersion = "nvi";
 
