@@ -8,6 +8,10 @@ const API_URL = "https://abibliadigital.api.br/api";
 // Se você renomear/recriar o serviço no Render, atualize essa URL.
 const BACKEND_URL = "https://site-devocional-teste-backend.onrender.com";
 
+// Client ID do "Continuar com Google" (console.cloud.google.com).
+// Precisa ser o MESMO valor configurado como GOOGLE_CLIENT_ID no backend.
+const GOOGLE_CLIENT_ID = "SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
+
 let currentVersion = "nvi";
 
 let currentVerse = {
@@ -2696,6 +2700,7 @@ const authNameField = $("authNameField");
 const authNameInput = $("authNameInput");
 const authEmailInput = $("authEmailInput");
 const authPasswordInput = $("authPasswordInput");
+const togglePasswordButton = $("togglePasswordButton");
 const authForm = $("authForm");
 const authError = $("authError");
 const authSubmitButton = $("authSubmitButton");
@@ -2740,13 +2745,106 @@ function setAuthMode(mode) {
     authError.classList.add("hidden");
 }
 
+const EYE_OPEN_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+    '<circle cx="12" cy="12" r="3"/></svg>';
+
+const EYE_CLOSED_SVG =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 ' +
+    '18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 ' +
+    '1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+if (togglePasswordButton && authPasswordInput) {
+    togglePasswordButton.addEventListener("click", () => {
+        const isPassword = authPasswordInput.type === "password";
+
+        authPasswordInput.type = isPassword ? "text" : "password";
+        togglePasswordButton.innerHTML = isPassword ? EYE_CLOSED_SVG : EYE_OPEN_SVG;
+        togglePasswordButton.setAttribute(
+            "aria-label",
+            isPassword ? "Esconder senha" : "Mostrar senha"
+        );
+    });
+}
+
 function openAuthModal() {
     setAuthMode("login");
+
+    authPasswordInput.type = "password";
+
+    if (togglePasswordButton) {
+        togglePasswordButton.innerHTML = EYE_OPEN_SVG;
+        togglePasswordButton.setAttribute("aria-label", "Mostrar senha");
+    }
+
     authModal.classList.remove("hidden");
+
+    initGoogleSignIn();
 }
 
 function closeAuthModal() {
     authModal.classList.add("hidden");
+}
+
+
+/* =========================================================
+   CONTA — LOGIN COM GOOGLE
+========================================================= */
+
+async function handleGoogleCredential(response) {
+    authError.classList.add("hidden");
+
+    try {
+        const data = await apiRequest("/api/auth/google", {
+            method: "POST",
+            body: JSON.stringify({ credential: response.credential })
+        });
+
+        setAuthToken(data.token);
+
+        closeAuthModal();
+        updateAccountUI(data.user);
+        await syncAfterLogin();
+
+    } catch (error) {
+        authError.textContent = error.message || "Não foi possível entrar com o Google.";
+        authError.classList.remove("hidden");
+    }
+}
+
+function initGoogleSignIn(attempts = 0) {
+    const container = $("googleSignInButton");
+    if (!container) return;
+
+    // O script do Google carrega de forma assíncrona — se ainda não
+    // chegou, tenta de novo por alguns segundos.
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        if (attempts < 20) {
+            setTimeout(() => initGoogleSignIn(attempts + 1), 250);
+        }
+        return;
+    }
+
+    if (container.dataset.rendered === "true") return;
+
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential
+    });
+
+    google.accounts.id.renderButton(container, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        locale: "pt-BR",
+        width: 280
+    });
+
+    container.dataset.rendered = "true";
 }
 
 if (openAuthModalButton) {
@@ -2813,6 +2911,13 @@ if (authForm) {
 
 if (logoutButton) {
     logoutButton.addEventListener("click", () => {
+        const confirmed = confirm(
+            "Tem certeza que deseja sair da sua conta? Os dados salvos " +
+            "neste aparelho serão apagados (mas continuam seguros na nuvem)."
+        );
+
+        if (!confirmed) return;
+
         logoutAccount();
     });
 }
