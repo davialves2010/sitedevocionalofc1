@@ -724,25 +724,6 @@ async function loadChapter() {
         title.textContent = `${data.book.name} ${data.chapter.number}`;
         chapterContent.appendChild(title);
 
-   /*          */
-       
-       if (window.Highlights) {
-    const toolsHost = document.createElement("div");
-    chapterContent.insertBefore(toolsHost, chapterContent.children[1] || null);
-
-    Highlights.mountChapterTools(toolsHost, book, Number(chapter), verseNumber => {
-        const target = Array.from(chapterContent.querySelectorAll(".bible-verse"))
-            .find(el => Number(el.querySelector(".verse-number")?.textContent) === verseNumber);
-        if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "center" });
-            target.classList.add("verse-jump-highlight");
-            setTimeout(() => target.classList.remove("verse-jump-highlight"), 2400);
-        }
-    });
-}
-
-       /*          */
-
         data.verses.forEach(verse => {
             const wrapper = document.createElement("div");
             wrapper.className = "bible-verse";
@@ -754,15 +735,8 @@ async function loadChapter() {
             const content = document.createElement("div");
             content.className = "verse-reading";
 
-            // DEPOIS
-const text = document.createElement("div");
-content.appendChild(text);
-
-if (window.Highlights) {
-    Highlights.renderVerse(text, book, Number(chapter), verse.number, verse.text);
-} else {
-    text.textContent = verse.text; // fallback se o script não carregou
-}
+            const text = document.createElement("div");
+            text.textContent = verse.text;
 
             const actions = document.createElement("div");
             actions.className = "verse-actions";
@@ -1210,52 +1184,6 @@ function renderFavorites() {
         favoritesList.appendChild(item);
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================================================
-   GRIFAR VERSICULO
-========================================================= */
-
-
-
-
-if (window.Highlights) {
-    Highlights.init();
-
-    // Sempre que um grifo for criado/editado/removido, recarrega a
-    // leitura que estiver aberta no momento pra refletir a mudança.
-    Highlights.onNeedsRerender(() => {
-        if (document.getElementById("bibleScreen")?.classList.contains("active-screen")) {
-            if (bookSelect.value && chapterSelect.value) loadChapter();
-        }
-        if (currentPlan && !planReading.classList.contains("hidden")) {
-            loadPlanDay(currentPlan, currentPlanViewDay);
-        }
-    });
-}
-
-
-
-
-
-
-/* =========================================================
-   GRIFAR VERSICULO
-========================================================= */
-
-
-
-
 
 
 /* =========================================================
@@ -1873,18 +1801,9 @@ function renderPlanDay(plan, day, data) {
             number.className = "verse-number";
             number.textContent = verse.number;
 
-           // DEPOIS
-const content = document.createElement("div");
-content.className = "verse-reading";
-
-if (window.Highlights) {
-    Highlights.renderVerse(content, plan.id === "joao21" ? "jo" : plan.id, day, verse.number, verse.text);
-    // obs: use aqui o mesmo "book" que a API retornou (ver plan-reading.js);
-    // se preferir, exponha data.book junto no JSON do endpoint pra não
-    // depender de mapear plan.id -> abreviação do livro no front.
-} else {
-    content.textContent = verse.text;
-}
+            const content = document.createElement("div");
+            content.className = "verse-reading";
+            content.textContent = verse.text;
 
             wrapper.appendChild(number);
             wrapper.appendChild(content);
@@ -2664,8 +2583,6 @@ function logoutAccount() {
 
     clearAuthToken();
     clearAllLocalData();
-
-   
     updateAccountUI(null);
 }
 
@@ -2680,7 +2597,6 @@ function collectLocalDataSnapshot() {
         reflections: getReflections(),
         completedDays: [...getCompletedDays()],
         planProgress: getPlanProgress(),
-        highlights: window.Highlights ? Highlights.getSnapshot() : [], // novo
         reminderTime: localStorage.getItem(STORAGE.reminderTime) || "07:00",
         reminderEnabled: localStorage.getItem(STORAGE.reminderEnabled) === "true",
         theme: document.body.classList.contains("dark") ? "dark" : "light"
@@ -2692,10 +2608,6 @@ function applyCloudDataSnapshot(data) {
     if (data.reflections) saveReflections(data.reflections);
     if (data.completedDays) saveCompletedDays(new Set(data.completedDays));
     if (data.planProgress) savePlanProgress(data.planProgress);
-   if (data.highlights && window.Highlights) {
-    Highlights.applySnapshot(data.highlights);
-}
-   
 
     if (data.reminderTime) {
         localStorage.setItem(STORAGE.reminderTime, data.reminderTime);
