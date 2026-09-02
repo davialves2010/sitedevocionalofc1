@@ -1288,6 +1288,10 @@ pathTabs.forEach(tab => {
             renderReflections();
         }
 
+        if (target === "personalDevotionalsHistory") {
+            renderPersonalDevotionalsHistory();
+        }
+
         if (target === "streakCalendar") {
             renderCalendar();
             updateStreakDisplays();
@@ -3090,4 +3094,109 @@ if (personalDevotionalBackButton) {
     personalDevotionalBackButton.addEventListener("click", () => {
         closeOverlay(personalDevotionalOverlay);
     });
+}
+
+
+/* =========================================================
+   HISTÓRICO DE DEVOCIONAIS PESSOAIS
+========================================================= */
+
+const personalDevotionalsHistoryList = $("personalDevotionalsHistoryList");
+
+function formatHistoryDate(isoString) {
+    const dateObject = new Date(isoString);
+
+    return dateObject.toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+}
+
+async function renderPersonalDevotionalsHistory() {
+    if (!personalDevotionalsHistoryList) return;
+
+    if (!isLoggedIn()) {
+        personalDevotionalsHistoryList.innerHTML = `
+            <div class="empty-state">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+                <h2>Entre na sua conta</h2>
+                <p>Crie uma conta ou entre para guardar o histórico dos seus devocionais pessoais.</p>
+            </div>
+        `;
+        return;
+    }
+
+    personalDevotionalsHistoryList.innerHTML = `
+        <div class="skeleton skeleton-block" style="height: 130px;"></div>
+        <div class="skeleton skeleton-block" style="height: 130px;"></div>
+    `;
+
+    try {
+        const { data } = await apiRequest("/api/data", { method: "GET" });
+        const history = data.personalDevotionals || [];
+
+        if (!history.length) {
+            personalDevotionalsHistoryList.innerHTML = `
+                <div class="empty-state">
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+                    <h2>Nenhum devocional ainda</h2>
+                    <p>Toque em "Como você está se sentindo?" na tela inicial para começar.</p>
+                </div>
+            `;
+            return;
+        }
+
+        personalDevotionalsHistoryList.innerHTML = "";
+
+        history.forEach(entry => {
+            const item = document.createElement("article");
+            item.className = "personal-devotional-history-item";
+
+            const date = document.createElement("span");
+            date.className = "personal-devotional-history-date";
+            date.textContent = formatHistoryDate(entry.createdAt);
+
+            const feeling = document.createElement("p");
+            feeling.className = "personal-devotional-history-feeling";
+            feeling.textContent = `"${entry.feeling}"`;
+
+            const reference = document.createElement("span");
+            reference.className = "personal-devotional-history-reference";
+            reference.textContent = entry.reference;
+
+            const verses = document.createElement("p");
+            verses.className = "personal-devotional-history-verses";
+            verses.textContent = `"${entry.verses}"`;
+
+            const title = document.createElement("h3");
+            title.className = "personal-devotional-history-title";
+            title.textContent = entry.devotionalTitle;
+
+            const reflection = document.createElement("p");
+            reflection.className = "personal-devotional-history-reflection";
+            reflection.textContent = entry.reflection;
+
+            item.appendChild(date);
+            item.appendChild(feeling);
+            item.appendChild(reference);
+            item.appendChild(verses);
+            item.appendChild(title);
+            item.appendChild(reflection);
+
+            personalDevotionalsHistoryList.appendChild(item);
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        personalDevotionalsHistoryList.innerHTML = `
+            <div class="empty-state">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <h2>Não foi possível carregar</h2>
+                <p>Tente novamente em alguns instantes.</p>
+            </div>
+        `;
+    }
 }
