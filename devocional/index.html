@@ -571,6 +571,18 @@
 
             </div>
 
+            <!-- JORNADA EMOCIONAL -->
+<div class="journey-chart-card">
+    <h2>Sua jornada emocional</h2>
+    <p id="journeyChartEmpty" class="journey-chart-empty hidden"></p>
+    <canvas id="emotionCategoryChart" height="220"></canvas>
+</div>
+
+<div class="journey-chart-card">
+    <h2>Frequência ao longo do tempo</h2>
+    <canvas id="journeyTimelineChart" height="220"></canvas>
+</div>
+
             <p id="statsStartDate" class="stats-start-date"></p>
 
             <button id="shareStatsButton" class="share-button" type="button">
@@ -963,6 +975,11 @@
     </div>
 
 
+    <!-- GRÁFICOS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- JAVASCRIPT -->
+<script src="./script.js"></script>
     <!-- JAVASCRIPT -->
     <script src="./script.js"></script>
 
