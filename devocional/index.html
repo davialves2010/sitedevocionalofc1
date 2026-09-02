@@ -640,6 +640,110 @@
         </div>
     </div>
 
+    <!-- =========================================================
+     MODAL: DEVOCIONAL DE HOJE
+========================================================== -->
+<div id="dailyDevotionalModal" class="modal hidden">
+    <div class="modal-content">
+        <button id="closeDailyDevotionalModal" class="close" type="button">×</button>
+
+        <span class="section-label">DEVOCIONAL DE HOJE</span>
+
+        <div id="devotionalLoading" class="devotional-loading">
+            <div class="skeleton skeleton-block" style="height: 88px;"></div>
+            <div class="skeleton skeleton-block" style="height: 130px;"></div>
+            <div class="skeleton skeleton-line w-50"></div>
+            <div class="skeleton skeleton-line w-100"></div>
+            <div class="skeleton skeleton-line w-90"></div>
+            <div class="skeleton skeleton-line w-70"></div>
+        </div>
+
+        <div id="devotionalContent" class="hidden">
+
+            <blockquote id="devotionalQuote" class="devotional-quote"></blockquote>
+
+            <div class="devotional-passage">
+                <span class="label">PASSAGEM DO DIA</span>
+                <p id="devotionalVerseText" class="devotional-verse-text"></p>
+                <p id="devotionalVerseRef" class="devotional-verse-ref"></p>
+            </div>
+
+            <div class="devotional-reflection">
+                <h2 id="devotionalTitle"></h2>
+                <div id="devotionalParagraphs"></div>
+            </div>
+
+            <button id="devotionalCompleteButton" class="devotional-complete-button" type="button">
+                Concluir devocional de hoje
+            </button>
+
+            <button id="shareDevotionalButton" class="share-button" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Compartilhar
+            </button>
+
+        </div>
+
+        <div id="devotionalError" class="verse-error hidden"></div>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     MODAL: DEVOCIONAL CONVERSACIONAL / PESSOAL
+========================================================== -->
+<div id="personalDevotionalModal" class="modal hidden">
+    <div class="modal-content">
+        <button id="closePersonalDevotionalModal" class="close" type="button">×</button>
+
+        <span class="section-label">COMO VOCÊ ESTÁ SE SENTINDO?</span>
+
+        <div class="personal-devotional-box">
+            <textarea
+                id="personalFeelingInput"
+                placeholder="Escreva livremente... ex: estou ansioso com uma decisão importante"
+                maxlength="500"
+            ></textarea>
+
+            <button id="personalDevotionalButton" class="primary-button" type="button">
+                Gerar meu devocional
+            </button>
+        </div>
+
+        <div id="personalDevotionalLoading" class="devotional-loading hidden">
+            <div class="skeleton skeleton-block" style="height: 88px;"></div>
+            <div class="skeleton skeleton-block" style="height: 130px;"></div>
+            <div class="skeleton skeleton-line w-50"></div>
+            <div class="skeleton skeleton-line w-100"></div>
+            <div class="skeleton skeleton-line w-90"></div>
+        </div>
+
+        <div id="personalDevotionalResult" class="hidden">
+
+            <div class="devotional-passage">
+                <span class="label" id="personalDevotionalReference"></span>
+                <p id="personalDevotionalVerses" class="devotional-verse-text"></p>
+            </div>
+
+            <div class="devotional-reflection">
+                <h2 id="personalDevotionalTitle"></h2>
+                <p id="personalDevotionalReflection"></p>
+            </div>
+
+            <div class="devotional-quote" id="personalDevotionalPrayer"></div>
+
+            <p class="personal-devotional-support-note" id="personalDevotionalSupportNote"></p>
+
+            <button id="personalDevotionalNewButton" class="secondary-button" type="button">
+                Escrever outro desabafo
+            </button>
+
+        </div>
+
+        <div id="personalDevotionalError" class="verse-error hidden"></div>
+    </div>
+</div>
+
 
     <!-- =========================================================
          MODAL DE CONTA (LOGIN / CADASTRO)
