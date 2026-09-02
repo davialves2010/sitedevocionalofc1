@@ -138,6 +138,65 @@
 
             </section>
 
+
+
+            <!-- =================================================
+     DEVOCIONAL CONVERSACIONAL / PESSOAL
+================================================== -->
+<section class="personal-devotional" id="personalDevotional">
+
+    <span class="section-label">COMO VOCÊ ESTÁ SE SENTINDO?</span>
+
+    <div class="personal-devotional-box">
+        <textarea
+            id="personalFeelingInput"
+            placeholder="Escreva livremente... ex: estou ansioso com uma decisão importante"
+            maxlength="500"
+        ></textarea>
+
+        <button id="personalDevotionalButton" class="primary-button" type="button">
+            Gerar meu devocional
+        </button>
+    </div>
+
+    <div id="personalDevotionalLoading" class="devotional-loading hidden">
+        <div class="skeleton skeleton-block" style="height: 88px;"></div>
+        <div class="skeleton skeleton-block" style="height: 130px;"></div>
+        <div class="skeleton skeleton-line w-50"></div>
+        <div class="skeleton skeleton-line w-100"></div>
+        <div class="skeleton skeleton-line w-90"></div>
+    </div>
+
+    <div id="personalDevotionalResult" class="hidden">
+
+        <div class="devotional-passage">
+            <span class="label" id="personalDevotionalReference"></span>
+            <p id="personalDevotionalVerses" class="devotional-verse-text"></p>
+        </div>
+
+        <div class="devotional-reflection">
+            <h2 id="personalDevotionalTitle"></h2>
+            <p id="personalDevotionalReflection"></p>
+        </div>
+
+        <div class="devotional-quote" id="personalDevotionalPrayer"></div>
+
+        <p class="personal-devotional-support-note" id="personalDevotionalSupportNote"></p>
+
+        <button id="personalDevotionalNewButton" class="secondary-button" type="button">
+            Escrever outro desabafo
+        </button>
+
+    </div>
+
+    <div id="personalDevotionalError" class="verse-error hidden"></div>
+
+</section>
+
+
+
+            
+
             <!-- ATALHO PLANOS DE LEITURA -->
             <section class="prayer-card">
                 <div class="prayer-icon" id="planShortcutIcon">📅</div>
