@@ -3100,3 +3100,57 @@ if (personalDevotionalModal) {
         }
     });
 }
+
+/* =========================================================
+   TELA CHEIA: DEVOCIONAL DE HOJE E DEVOCIONAL PESSOAL
+========================================================= */
+
+const openDailyDevotionalButton = $("openDailyDevotionalButton");
+const dailyDevotionalOverlay = $("dailyDevotionalOverlay");
+const dailyDevotionalBackButton = $("dailyDevotionalBackButton");
+
+const openPersonalDevotionalButton = $("openPersonalDevotionalButton");
+const personalDevotionalOverlay = $("personalDevotionalOverlay");
+const personalDevotionalBackButton = $("personalDevotionalBackButton");
+
+function openOverlay(overlay) {
+    if (!overlay) return;
+    overlay.classList.remove("hidden");
+    overlay.scrollTop = 0;
+    document.body.style.overflow = "hidden";
+}
+
+function closeOverlay(overlay) {
+    if (!overlay) return;
+    overlay.classList.add("hidden");
+    document.body.style.overflow = "";
+}
+
+/* --- Devocional de hoje --- */
+
+if (openDailyDevotionalButton) {
+    openDailyDevotionalButton.addEventListener("click", () => {
+        openOverlay(dailyDevotionalOverlay);
+    });
+}
+
+if (dailyDevotionalBackButton) {
+    dailyDevotionalBackButton.addEventListener("click", () => {
+        closeOverlay(dailyDevotionalOverlay);
+    });
+}
+
+/* --- Devocional pessoal --- */
+
+if (openPersonalDevotionalButton) {
+    openPersonalDevotionalButton.addEventListener("click", () => {
+        openOverlay(personalDevotionalOverlay);
+        if (personalFeelingInput) personalFeelingInput.focus();
+    });
+}
+
+if (personalDevotionalBackButton) {
+    personalDevotionalBackButton.addEventListener("click", () => {
+        closeOverlay(personalDevotionalOverlay);
+    });
+}
