@@ -125,7 +125,8 @@ const STORAGE = {
     reminderTime: "devocional_reminder_time",
     reminderEnabled: "devocional_reminder_enabled",
     reminderLastShown: "devocional_reminder_last_shown",
-    authToken: "devocional_auth_token"
+    authToken: "devocional_auth_token",
+    highlights: "devocional_highlights"   // <-- NOVO
 };
 
 
@@ -424,10 +425,16 @@ async function loadVerse(
         verseText.textContent = `"${data.text}"`;
         verseReference.textContent = `${data.book.name} ${data.chapter}:${data.number}`;
 
+        // GRIFOS: identifica esse trecho para permitir grifar/anotar
+        verseText.dataset.sourceKey = `bible:${currentVersion}:${book}:${data.chapter}:${data.number}`;
+        verseText.dataset.sourceType = "bible";
+        verseText.dataset.sourceLabel = `${data.book.name} ${data.chapter}:${data.number}`;
+
         loading.classList.add("hidden");
         verseContent.classList.remove("hidden");
 
         updateFavoriteButton();
+        applyStoredHighlights(verseContent);
 
     } catch (error) {
         console.error(error);
@@ -463,10 +470,17 @@ async function loadRandomVerse() {
         verseText.textContent = `"${data.text}"`;
         verseReference.textContent = `${data.book.name} ${data.chapter}:${data.number}`;
 
+        // GRIFOS
+        verseText.dataset.sourceKey =
+            `bible:${currentVersion}:${data.book.abbrev.pt}:${data.chapter}:${data.number}`;
+        verseText.dataset.sourceType = "bible";
+        verseText.dataset.sourceLabel = `${data.book.name} ${data.chapter}:${data.number}`;
+
         loading.classList.add("hidden");
         verseContent.classList.remove("hidden");
 
         updateFavoriteButton();
+        applyStoredHighlights(verseContent);
 
     } catch (error) {
         console.error(error);
@@ -572,9 +586,25 @@ function renderDevotional(data) {
 
     devotionalParagraphs.innerHTML = "";
 
-    data.devotionalParagraphs.forEach(paragraph => {
+    // GRIFOS: identifica quote, versículo e cada parágrafo
+    const dayKey = data.date || todayKey();
+
+    devotionalQuote.dataset.sourceKey = `devotional:${dayKey}:quote`;
+    devotionalQuote.dataset.sourceType = "devotional";
+    devotionalQuote.dataset.sourceLabel = `Devocional · ${data.verse.reference}`;
+
+    devotionalVerseText.dataset.sourceKey = `devotional:${dayKey}:verse`;
+    devotionalVerseText.dataset.sourceType = "devotional";
+    devotionalVerseText.dataset.sourceLabel = `Devocional · ${data.verse.reference}`;
+
+    data.devotionalParagraphs.forEach((paragraph, index) => {
         const p = document.createElement("p");
         p.textContent = paragraph;
+
+        p.dataset.sourceKey = `devotional:${dayKey}:paragraph:${index}`;
+        p.dataset.sourceType = "devotional";
+        p.dataset.sourceLabel = `Devocional · ${data.devotionalTitle}`;
+
         devotionalParagraphs.appendChild(p);
     });
 
@@ -583,6 +613,7 @@ function renderDevotional(data) {
     devotionalContent.classList.remove("hidden");
 
     updateCompleteButton();
+    applyStoredHighlights(devotionalContent);
 }
 
 async function loadDevotional() {
@@ -738,6 +769,12 @@ async function loadChapter() {
             const text = document.createElement("div");
             text.textContent = verse.text;
 
+            // GRIFOS: cada versículo vira uma "unidade" grifável
+            text.dataset.sourceKey =
+                `bible:${currentVersion}:${book}:${data.chapter.number}:${verse.number}`;
+            text.dataset.sourceType = "bible";
+            text.dataset.sourceLabel = `${data.book.name} ${data.chapter.number}:${verse.number}`;
+
             const actions = document.createElement("div");
             actions.className = "verse-actions";
 
@@ -760,6 +797,8 @@ async function loadChapter() {
 
             chapterContent.appendChild(wrapper);
         });
+
+        applyStoredHighlights(chapterContent);
 
     } catch (error) {
         console.error(error);
@@ -1200,6 +1239,400 @@ function removeFavorite(id) {
 }
 
 
+
+/* =========================================================
+   GRIFOS (HIGHLIGHTS)
+========================================================= */
+
+const HIGHLIGHT_COLORS = [
+    { id: "yellow", hex: "#ffe08a" },
+    { id: "green", hex: "#b7e4c7" },
+    { id: "blue", hex: "#a9d6f5" },
+    { id: "pink", hex: "#f6c1d9" }
+];
+
+function getHighlights() {
+    return JSON.parse(localStorage.getItem(STORAGE.highlights) || "[]");
+}
+
+function saveHighlights(highlights) {
+    localStorage.setItem(STORAGE.highlights, JSON.stringify(highlights));
+    scheduleCloudSync();
+}
+
+function findHighlightsBySourceKey(sourceKey) {
+    return getHighlights().filter(item => item.sourceKey === sourceKey);
+}
+
+// Aplica (desenha) os grifos já salvos em todos os elementos com
+// data-source-key dentro de um container recém-renderizado.
+function applyStoredHighlights(container) {
+    if (!container) return;
+
+    const units = container.querySelectorAll("[data-source-key]");
+
+    units.forEach(unit => {
+        const sourceKey = unit.dataset.sourceKey;
+        const matches = findHighlightsBySourceKey(sourceKey);
+
+        matches.forEach(highlight => {
+            wrapTextInElement(unit, highlight.text, highlight.id, highlight.color);
+        });
+    });
+}
+
+// Procura "searchText" dentro dos nós de texto de "element" e envolve
+// a primeira ocorrência com um <mark>. Funciona bem porque cada
+// versículo/parágrafo do app é sempre um único nó de texto.
+function wrapTextInElement(element, searchText, highlightId, color) {
+    if (!element || !searchText) return false;
+
+    if (element.querySelector(`mark[data-highlight-id="${highlightId}"]`)) {
+        return true; // já desenhado
+    }
+
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    let node;
+
+    while ((node = walker.nextNode())) {
+        const index = node.nodeValue.indexOf(searchText);
+
+        if (index !== -1) {
+            const range = document.createRange();
+            range.setStart(node, index);
+            range.setEnd(node, index + searchText.length);
+
+            const mark = document.createElement("mark");
+            mark.className = "highlight-mark";
+            mark.dataset.highlightId = highlightId;
+            mark.style.backgroundColor = color;
+
+            try {
+                range.surroundContents(mark);
+                mark.addEventListener("click", () => openHighlightModal("edit", highlightId));
+                return true;
+            } catch (error) {
+                return false; // seleção cruzando mais de um nó — ignora
+            }
+        }
+    }
+
+    return false;
+}
+
+const HIGHLIGHTABLE_SELECTOR = "[data-source-key]";
+const highlightToolbarButton = $("highlightToolbarButton");
+
+let pendingSelection = null;
+
+function getHighlightableAncestor(node) {
+    let element = node.nodeType === 3 ? node.parentElement : node;
+
+    while (element && element !== document.body) {
+        if (element.matches && element.matches(HIGHLIGHTABLE_SELECTOR)) {
+            return element;
+        }
+        element = element.parentElement;
+    }
+
+    return null;
+}
+
+function handleSelectionChange() {
+    const selection = window.getSelection();
+
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        hideHighlightToolbar();
+        return;
+    }
+
+    const text = selection.toString().trim();
+
+    if (!text) {
+        hideHighlightToolbar();
+        return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const ancestor = getHighlightableAncestor(range.commonAncestorContainer);
+
+    if (!ancestor) {
+        hideHighlightToolbar();
+        return;
+    }
+
+    pendingSelection = {
+        range: range.cloneRange(),
+        sourceKey: ancestor.dataset.sourceKey,
+        sourceType: ancestor.dataset.sourceType || "bible",
+        sourceLabel: ancestor.dataset.sourceLabel || "",
+        text
+    };
+
+    const rect = range.getBoundingClientRect();
+
+    highlightToolbarButton.style.left = `${rect.left + rect.width / 2}px`;
+    highlightToolbarButton.style.top = `${rect.top}px`;
+    highlightToolbarButton.classList.remove("hidden");
+}
+
+function hideHighlightToolbar() {
+    if (highlightToolbarButton) {
+        highlightToolbarButton.classList.add("hidden");
+    }
+    pendingSelection = null;
+}
+
+document.addEventListener("mouseup", handleSelectionChange);
+document.addEventListener("touchend", handleSelectionChange);
+
+if (highlightToolbarButton) {
+    // Evita que o navegador perca a seleção de texto ao tocar no botão
+    highlightToolbarButton.addEventListener("mousedown", event => event.preventDefault());
+    highlightToolbarButton.addEventListener("touchstart", event => event.preventDefault());
+
+    highlightToolbarButton.addEventListener("click", () => {
+        if (!pendingSelection) return;
+        openHighlightModal("create");
+    });
+}
+
+
+/* =========================================================
+   GRIFOS — MODAL
+========================================================= */
+
+const highlightModal = $("highlightModal");
+const highlightQuotedText = $("highlightQuotedText");
+const highlightColorPicker = $("highlightColorPicker");
+const highlightNoteInput = $("highlightNoteInput");
+const saveHighlightButton = $("saveHighlightButton");
+const deleteHighlightButton = $("deleteHighlightButton");
+const closeHighlightModalButton = $("closeHighlightModal");
+
+let highlightModalMode = "create";
+let editingHighlightId = null;
+let selectedHighlightColor = HIGHLIGHT_COLORS[0].hex;
+
+function renderHighlightColorPicker() {
+    highlightColorPicker.innerHTML = "";
+
+    HIGHLIGHT_COLORS.forEach(color => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "color-dot";
+        dot.style.background = color.hex;
+        dot.classList.toggle("selected", color.hex === selectedHighlightColor);
+
+        dot.addEventListener("click", () => {
+            selectedHighlightColor = color.hex;
+            renderHighlightColorPicker();
+        });
+
+        highlightColorPicker.appendChild(dot);
+    });
+}
+
+function openHighlightModal(mode, highlightId = null) {
+    highlightModalMode = mode;
+
+    if (mode === "create" && pendingSelection) {
+        editingHighlightId = null;
+        highlightQuotedText.textContent = `"${pendingSelection.text}"`;
+        highlightNoteInput.value = "";
+        selectedHighlightColor = HIGHLIGHT_COLORS[0].hex;
+        deleteHighlightButton.classList.add("hidden");
+
+    } else if (mode === "edit" && highlightId) {
+        const highlight = getHighlights().find(item => item.id === highlightId);
+        if (!highlight) return;
+
+        editingHighlightId = highlightId;
+        highlightQuotedText.textContent = `"${highlight.text}"`;
+        highlightNoteInput.value = highlight.note || "";
+        selectedHighlightColor = highlight.color;
+        deleteHighlightButton.classList.remove("hidden");
+    }
+
+    renderHighlightColorPicker();
+    hideHighlightToolbar();
+    highlightModal.classList.remove("hidden");
+}
+
+function closeHighlightModalFn() {
+    highlightModal.classList.add("hidden");
+    editingHighlightId = null;
+}
+
+function removeHighlightMarkFromDom(highlightId) {
+    const markElement = document.querySelector(`mark[data-highlight-id="${highlightId}"]`);
+    if (!markElement) return;
+
+    const parent = markElement.parentNode;
+    while (markElement.firstChild) {
+        parent.insertBefore(markElement.firstChild, markElement);
+    }
+    parent.removeChild(markElement);
+    parent.normalize();
+}
+
+if (closeHighlightModalButton) {
+    closeHighlightModalButton.addEventListener("click", closeHighlightModalFn);
+}
+
+if (highlightModal) {
+    highlightModal.addEventListener("click", event => {
+        if (event.target === highlightModal) closeHighlightModalFn();
+    });
+}
+
+if (saveHighlightButton) {
+    saveHighlightButton.addEventListener("click", () => {
+        const note = highlightNoteInput.value.trim();
+
+        if (highlightModalMode === "create" && pendingSelection) {
+            const highlight = {
+                id: `hl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                sourceType: pendingSelection.sourceType,
+                sourceKey: pendingSelection.sourceKey,
+                sourceLabel: pendingSelection.sourceLabel,
+                text: pendingSelection.text,
+                note,
+                color: selectedHighlightColor,
+                createdAt: new Date().toISOString()
+            };
+
+            const highlights = getHighlights();
+            highlights.push(highlight);
+            saveHighlights(highlights);
+
+            const ancestor = getHighlightableAncestor(pendingSelection.range.commonAncestorContainer);
+            wrapTextInElement(ancestor, highlight.text, highlight.id, highlight.color);
+
+            window.getSelection().removeAllRanges();
+
+        } else if (highlightModalMode === "edit" && editingHighlightId) {
+            const highlights = getHighlights();
+            const highlight = highlights.find(item => item.id === editingHighlightId);
+
+            if (highlight) {
+                highlight.note = note;
+                highlight.color = selectedHighlightColor;
+                saveHighlights(highlights);
+
+                const markElement = document.querySelector(
+                    `mark[data-highlight-id="${editingHighlightId}"]`
+                );
+                if (markElement) {
+                    markElement.style.backgroundColor = selectedHighlightColor;
+                }
+            }
+        }
+
+        renderHighlightsList();
+        closeHighlightModalFn();
+    });
+}
+
+if (deleteHighlightButton) {
+    deleteHighlightButton.addEventListener("click", () => {
+        if (!editingHighlightId) return;
+
+        const confirmed = confirm("Deseja remover este grifo?");
+        if (!confirmed) return;
+
+        saveHighlights(getHighlights().filter(item => item.id !== editingHighlightId));
+        removeHighlightMarkFromDom(editingHighlightId);
+
+        renderHighlightsList();
+        closeHighlightModalFn();
+    });
+}
+
+
+/* =========================================================
+   GRIFOS — LISTA (aba Caminho)
+========================================================= */
+
+const highlightsList = $("highlightsList");
+
+function renderHighlightsList() {
+    if (!highlightsList) return;
+
+    const highlights = getHighlights();
+
+    highlightsList.innerHTML = "";
+
+    if (!highlights.length) {
+        highlightsList.innerHTML = `
+            <div class="empty-state">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></span>
+                <h2>Nenhum grifo ainda</h2>
+                <p>Selecione um trecho da Bíblia ou do devocional e toque em "Grifar".</p>
+            </div>
+        `;
+        return;
+    }
+
+    highlights.slice().reverse().forEach(highlight => {
+        const item = document.createElement("article");
+        item.className = "highlight-item";
+
+        const reference = document.createElement("div");
+        reference.className = "reference";
+
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.background = highlight.color;
+
+        reference.appendChild(dot);
+        reference.append(highlight.sourceLabel || "Grifo");
+
+        const quote = document.createElement("blockquote");
+        quote.textContent = `"${highlight.text}"`;
+        quote.style.background = `${highlight.color}33`;
+
+        item.appendChild(reference);
+        item.appendChild(quote);
+
+        if (highlight.note) {
+            const note = document.createElement("p");
+            note.className = "highlight-note";
+            note.textContent = highlight.note;
+            item.appendChild(note);
+        }
+
+        const actions = document.createElement("div");
+        actions.className = "highlight-item-actions";
+
+        const editButton = document.createElement("button");
+        editButton.className = "secondary-button";
+        editButton.textContent = "Editar";
+        editButton.addEventListener("click", () => openHighlightModal("edit", highlight.id));
+
+        const removeButton = document.createElement("button");
+        removeButton.className = "remove-favorite";
+        removeButton.textContent = "Remover";
+        removeButton.addEventListener("click", () => {
+            const confirmed = confirm("Deseja remover este grifo?");
+            if (!confirmed) return;
+
+            saveHighlights(getHighlights().filter(h => h.id !== highlight.id));
+            removeHighlightMarkFromDom(highlight.id);
+
+            renderHighlightsList();
+        });
+
+        actions.appendChild(editButton);
+        actions.appendChild(removeButton);
+        item.appendChild(actions);
+
+        highlightsList.appendChild(item);
+    });
+}
+
+
+
 /* =========================================================
    NAVEGAÇÃO PRINCIPAL
 ========================================================= */
@@ -1297,6 +1730,10 @@ pathTabs.forEach(tab => {
             renderCalendar();
             updateStreakDisplays();
         }
+
+       if (target === "highlights") {
+    renderHighlightsList();
+}
     });
 });
 
@@ -1789,6 +2226,11 @@ function renderPlanDay(plan, day, data) {
         planVerseReference.textContent = data.reference;
         planVerseCard.classList.remove("hidden");
 
+        // GRIFOS
+        planVerseText.dataset.sourceKey = `plan:${plan.id}:${day}:passage`;
+        planVerseText.dataset.sourceType = "bible";
+        planVerseText.dataset.sourceLabel = `${plan.title} · Dia ${day} (${data.reference})`;
+
     } else {
         planChapterTitle.textContent = data.reference;
         planChapterVerses.innerHTML = "";
@@ -1805,6 +2247,11 @@ function renderPlanDay(plan, day, data) {
             content.className = "verse-reading";
             content.textContent = verse.text;
 
+            // GRIFOS
+            content.dataset.sourceKey = `plan:${plan.id}:${day}:verse:${verse.number}`;
+            content.dataset.sourceType = "bible";
+            content.dataset.sourceLabel = `${plan.title} · Dia ${day} (${data.reference}:${verse.number})`;
+
             wrapper.appendChild(number);
             wrapper.appendChild(content);
 
@@ -1817,9 +2264,15 @@ function renderPlanDay(plan, day, data) {
     planDevotionalTitle.textContent = data.devotionalTitle;
     planDevotionalParagraphs.innerHTML = "";
 
-    data.devotionalParagraphs.forEach(paragraph => {
+    data.devotionalParagraphs.forEach((paragraph, index) => {
         const p = document.createElement("p");
         p.textContent = paragraph;
+
+        // GRIFOS
+        p.dataset.sourceKey = `plan:${plan.id}:${day}:paragraph:${index}`;
+        p.dataset.sourceType = "devotional";
+        p.dataset.sourceLabel = `${plan.title} · Dia ${day}`;
+
         planDevotionalParagraphs.appendChild(p);
     });
 
@@ -1833,8 +2286,9 @@ function renderPlanDay(plan, day, data) {
     planCompleteButton.disabled = isCompleted;
 
     planCompleteButton.onclick = () => completePlanDay(plan, day);
-}
 
+    applyStoredHighlights(planReadingContent);
+}
 function completePlanDay(plan, day) {
     const progress = getPlanProgress();
     const state = progress[plan.id] || { completedDays: [] };
@@ -1875,6 +2329,7 @@ function clearAllLocalData() {
     localStorage.removeItem(STORAGE.reflections);
     localStorage.removeItem(STORAGE.completedDays);
     localStorage.removeItem(STORAGE.planProgress);
+    localStorage.removeItem(STORAGE.highlights); // <-- NOVO
 
     Object.keys(localStorage)
         .filter(key => key.startsWith("plano_leitura_"))
@@ -1887,6 +2342,7 @@ function clearAllLocalData() {
     renderReflections();
     renderPlansList();
     renderHomePlanShortcut();
+    renderHighlightsList(); // <-- NOVO
 }
 
 $("clearDataButton").addEventListener("click", () => {
@@ -1912,6 +2368,7 @@ renderReflections();
 renderCalendar();
 renderPlansList();
 renderHomePlanShortcut();
+renderHighlightsList(); // <-- NOVO
 updateCompleteButton();
 loadVerse();
 loadBooks();
@@ -2597,6 +3054,7 @@ function collectLocalDataSnapshot() {
         reflections: getReflections(),
         completedDays: [...getCompletedDays()],
         planProgress: getPlanProgress(),
+        highlights: getHighlights(), // <-- NOVO
         reminderTime: localStorage.getItem(STORAGE.reminderTime) || "07:00",
         reminderEnabled: localStorage.getItem(STORAGE.reminderEnabled) === "true",
         theme: document.body.classList.contains("dark") ? "dark" : "light"
@@ -2608,6 +3066,7 @@ function applyCloudDataSnapshot(data) {
     if (data.reflections) saveReflections(data.reflections);
     if (data.completedDays) saveCompletedDays(new Set(data.completedDays));
     if (data.planProgress) savePlanProgress(data.planProgress);
+    if (data.highlights) saveHighlights(data.highlights); // <-- NOVO
 
     if (data.reminderTime) {
         localStorage.setItem(STORAGE.reminderTime, data.reminderTime);
@@ -2625,12 +3084,12 @@ function applyCloudDataSnapshot(data) {
         localStorage.setItem(STORAGE.theme, "light");
     }
 
-    // Atualiza tudo que depende desses dados na tela
     renderFavorites();
     renderReflections();
     renderCalendar();
     renderPlansList();
     renderHomePlanShortcut();
+    renderHighlightsList(); // <-- NOVO
     updateStreakDisplays();
     updateCompleteButton();
     loadTheme();
@@ -2646,7 +3105,8 @@ function isCloudDataEmpty(data) {
         (!data.favorites || !data.favorites.length) &&
         (!data.reflections || !data.reflections.length) &&
         (!data.completedDays || !data.completedDays.length) &&
-        (!data.planProgress || !Object.keys(data.planProgress).length)
+        (!data.planProgress || !Object.keys(data.planProgress).length) &&
+        (!data.highlights || !data.highlights.length) // <-- NOVO
     );
 }
 
