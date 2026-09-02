@@ -2361,3 +2361,59 @@ body.dark .navigation {
     font-size: 14px;
     line-height: 1.7;
 }
+
+/* =========================================
+   BOTÃO COMPACTO: HISTÓRICO DE DEVOCIONAIS PESSOAIS
+========================================= */
+
+.personal-devotional-history-button {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+
+    padding: 20px 22px;
+    margin-bottom: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 22px;
+
+    background: var(--card);
+    backdrop-filter: blur(15px);
+
+    box-shadow: 0 10px 30px rgba(40, 50, 42, .06);
+
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+
+    transition: transform .2s, box-shadow .2s;
+}
+
+.personal-devotional-history-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(40, 50, 42, .1);
+}
+
+.personal-devotional-history-button-date {
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.personal-devotional-history-button-feeling {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.personal-devotional-history-button-title {
+    font-family: "Playfair Display", serif;
+    font-size: 17px;
+    color: var(--text);
+}
