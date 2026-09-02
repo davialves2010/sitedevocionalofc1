@@ -2941,3 +2941,97 @@ async function checkExistingSession() {
 }
 
 checkExistingSession();
+
+
+/* =========================================================
+   DEVOCIONAL CONVERSACIONAL / PESSOAL
+========================================================= */
+
+const personalFeelingInput = $("personalFeelingInput");
+const personalDevotionalButton = $("personalDevotionalButton");
+const personalDevotionalLoading = $("personalDevotionalLoading");
+const personalDevotionalResult = $("personalDevotionalResult");
+const personalDevotionalError = $("personalDevotionalError");
+const personalDevotionalReference = $("personalDevotionalReference");
+const personalDevotionalVerses = $("personalDevotionalVerses");
+const personalDevotionalTitle = $("personalDevotionalTitle");
+const personalDevotionalReflection = $("personalDevotionalReflection");
+const personalDevotionalPrayer = $("personalDevotionalPrayer");
+const personalDevotionalSupportNote = $("personalDevotionalSupportNote");
+const personalDevotionalNewButton = $("personalDevotionalNewButton");
+
+async function generatePersonalDevotional(feeling) {
+    const token = getAuthToken();
+
+    const response = await fetch(`${BACKEND_URL}/api/personal-devotional`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ feeling })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || "Não foi possível gerar seu devocional agora.");
+    }
+
+    return data;
+}
+
+function renderPersonalDevotional(data) {
+    personalDevotionalReference.textContent = data.reference;
+    personalDevotionalVerses.textContent = `"${data.verses}"`;
+    personalDevotionalTitle.textContent = data.devotionalTitle;
+    personalDevotionalReflection.textContent = data.reflection;
+    personalDevotionalPrayer.textContent = data.prayer;
+    personalDevotionalSupportNote.textContent = data.supportNote;
+
+    personalDevotionalLoading.classList.add("hidden");
+    personalDevotionalError.classList.add("hidden");
+    personalDevotionalResult.classList.remove("hidden");
+
+    $("personalDevotional").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+if (personalDevotionalButton) {
+    personalDevotionalButton.addEventListener("click", async () => {
+        const feeling = personalFeelingInput.value.trim();
+
+        if (!feeling) {
+            alert("Escreva como você está se sentindo antes de continuar.");
+            return;
+        }
+
+        personalDevotionalButton.disabled = true;
+        personalDevotionalLoading.classList.remove("hidden");
+        personalDevotionalResult.classList.add("hidden");
+        personalDevotionalError.classList.add("hidden");
+
+        try {
+            const data = await generatePersonalDevotional(feeling);
+            renderPersonalDevotional(data);
+
+        } catch (error) {
+            console.error(error);
+
+            personalDevotionalLoading.classList.add("hidden");
+            personalDevotionalError.textContent =
+                "Não foi possível gerar seu devocional agora. Tente novamente em instantes.";
+            personalDevotionalError.classList.remove("hidden");
+
+        } finally {
+            personalDevotionalButton.disabled = false;
+        }
+    });
+}
+
+if (personalDevotionalNewButton) {
+    personalDevotionalNewButton.addEventListener("click", () => {
+        personalFeelingInput.value = "";
+        personalDevotionalResult.classList.add("hidden");
+        personalFeelingInput.focus();
+    });
+}
