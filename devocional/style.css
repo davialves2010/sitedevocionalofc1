@@ -2447,3 +2447,517 @@ body.dark .navigation {
     color: var(--muted);
     font-size: 13px;
 }
+
+
+
+/* =========================================================
+   HIGHLIGHTS.CSS — Grifos e anotações dentro do capítulo
+   =========================================================
+   Usa as mesmas variáveis (--card, --border, --text, --green...)
+   já definidas em style.css, então herda o tema claro/escuro do
+   app automaticamente. Só some as variáveis de cor dos 5 temas.
+   ========================================================= */
+
+:root {
+    /* Cada tema = tinta de fundo (leve) + cor do traço + cor de texto
+       do "chip" na legenda/diálogo. Contraste calculado para AA sobre
+       --card no claro e no escuro. */
+    --hl-promessa-bg: rgba(214, 158, 46, .30);
+    --hl-promessa-line: #8a5f18;
+    --hl-promessa-fg: #6b4a12;
+
+    --hl-oracao-bg: rgba(150, 111, 214, .28);
+    --hl-oracao-line: #5c3f96;
+    --hl-oracao-fg: #4a3178;
+
+    --hl-sabedoria-bg: rgba(74, 150, 199, .28);
+    --hl-sabedoria-line: #2b6689;
+    --hl-sabedoria-fg: #245670;
+
+    --hl-atencao-bg: rgba(202, 96, 96, .28);
+    --hl-atencao-line: #963f3f;
+    --hl-atencao-fg: #7a3333;
+
+    --hl-gratidao-bg: rgba(84, 138, 96, .30);
+    --hl-gratidao-line: #33603d;
+    --hl-gratidao-fg: #2a4e32;
+}
+
+body.dark {
+    --hl-promessa-bg: rgba(230, 179, 74, .30);
+    --hl-promessa-line: #f0c977;
+    --hl-promessa-fg: #f2d18f;
+
+    --hl-oracao-bg: rgba(176, 140, 230, .30);
+    --hl-oracao-line: #cbb2f0;
+    --hl-oracao-fg: #d8c4f5;
+
+    --hl-sabedoria-bg: rgba(100, 176, 219, .30);
+    --hl-sabedoria-line: #9ed4f2;
+    --hl-sabedoria-fg: #b4e0f7;
+
+    --hl-atencao-bg: rgba(224, 120, 120, .30);
+    --hl-atencao-line: #f0a3a3;
+    --hl-atencao-fg: #f4bcbc;
+
+    --hl-gratidao-bg: rgba(116, 178, 128, .30);
+    --hl-gratidao-line: #a7dab1;
+    --hl-gratidao-fg: #c0e6c8;
+}
+
+/* Contraste alto (Windows High Contrast / preferência do sistema):
+   reforça os traços e remove a dependência de tons sutis de fundo. */
+@media (prefers-contrast: more) {
+    .hl {
+        outline: 2px solid currentColor;
+        background: transparent !important;
+    }
+}
+
+
+/* =========================================================
+   UTILITÁRIO — texto só para leitor de tela
+========================================================= */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* =========================================================
+   TEXTO DO VERSÍCULO E GRIFOS INLINE
+========================================================= */
+
+.hl-verse-text {
+    line-height: 1.9;
+}
+
+.hl-word {
+    /* palavra "normal" (sem grifo) — só existe pra mapear seleção */
+}
+
+mark.hl {
+    padding: 1px 2px;
+    border-radius: 4px;
+    color: inherit;
+    background: var(--hl-promessa-bg);
+    border-bottom: 2px solid var(--hl-promessa-line);
+    cursor: pointer;
+}
+
+mark.hl:focus-visible {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 2px;
+}
+
+/* padrão de traço diferente por tema — nunca só a cor */
+mark.hl-promessa   { background: var(--hl-promessa-bg);   border-bottom-style: solid;  border-bottom-color: var(--hl-promessa-line); }
+mark.hl-oracao      { background: var(--hl-oracao-bg);     border-bottom-style: dashed; border-bottom-color: var(--hl-oracao-line); }
+mark.hl-sabedoria   { background: var(--hl-sabedoria-bg);  border-bottom-style: dotted; border-bottom-color: var(--hl-sabedoria-line); border-bottom-width: 3px; }
+mark.hl-atencao     { background: var(--hl-atencao-bg);    border-bottom-style: wavy;   border-bottom-color: var(--hl-atencao-line); }
+mark.hl-gratidao    { background: var(--hl-gratidao-bg);   border-bottom-style: double; border-bottom-color: var(--hl-gratidao-line); border-bottom-width: 3px; }
+
+.hl-grifar-button {
+    /* herda .small-action do style.css do app */
+}
+
+
+/* =========================================================
+   BARRA FLUTUANTE (aparece após seleção nativa de texto)
+========================================================= */
+
+.hl-toolbar {
+    position: absolute;
+    z-index: 200;
+    transform: translateX(-50%);
+
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+
+    border-radius: 16px;
+    background: var(--text);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, .25);
+}
+
+body.dark .hl-toolbar {
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.hl-toolbar-swatch {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 50%;
+
+    font-size: 16px;
+    cursor: pointer;
+
+    transition: transform .15s;
+}
+
+.hl-toolbar-swatch:hover,
+.hl-toolbar-swatch:focus-visible {
+    transform: scale(1.12);
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.hl-swatch-promessa  { background: var(--hl-promessa-bg); }
+.hl-swatch-oracao     { background: var(--hl-oracao-bg); }
+.hl-swatch-sabedoria  { background: var(--hl-sabedoria-bg); }
+.hl-swatch-atencao    { background: var(--hl-atencao-bg); }
+.hl-swatch-gratidao   { background: var(--hl-gratidao-bg); }
+
+
+/* =========================================================
+   DIÁLOGOS (criar / editar grifo)
+========================================================= */
+
+dialog.hl-dialog {
+    width: min(92vw, 480px);
+    max-height: 85vh;
+
+    padding: 0;
+    border: 0;
+    border-radius: 24px;
+
+    background: var(--background);
+    color: var(--text);
+
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .3);
+}
+
+dialog.hl-dialog::backdrop {
+    background: rgba(20, 30, 24, .5);
+    backdrop-filter: blur(4px);
+}
+
+.hl-dialog-form {
+    padding: 28px;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+.hl-dialog-title {
+    margin-bottom: 10px;
+    font-family: "Playfair Display", serif;
+    font-size: 24px;
+}
+
+.hl-dialog-hint {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.hl-field-label {
+    display: block;
+    margin: 16px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* palavras clicáveis (picker acessível) */
+.hl-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 14px;
+
+    border-radius: 16px;
+    background: var(--background-soft);
+    border: 1px solid var(--border);
+}
+
+.hl-chip {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 10px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+    transition: .15s;
+}
+
+.hl-chip:hover {
+    border-color: var(--green);
+}
+
+.hl-chip:focus-visible {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 2px;
+}
+
+.hl-chip.is-selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+    font-weight: 600;
+}
+
+.hl-preview {
+    margin-top: 12px;
+    padding: 12px 14px;
+
+    border-radius: 12px;
+    background: var(--green-light);
+    color: var(--green-dark);
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.hl-select-all {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.hl-theme-field {
+    margin-top: 4px;
+}
+
+.hl-theme-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hl-theme-option {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 9px 13px;
+
+    border: 2px solid var(--border);
+    border-radius: 14px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: .15s;
+}
+
+.hl-theme-option:focus-visible {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 2px;
+}
+
+.hl-theme-option.is-selected {
+    border-color: var(--green-dark);
+    background: var(--green-light);
+}
+
+.hl-theme-icon {
+    font-size: 16px;
+}
+
+#hlCreateNote,
+#hlEditNote {
+    min-height: 90px;
+}
+
+.hl-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.hl-dialog-actions-edit {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+}
+
+.hl-remove-button {
+    width: 100%;
+    justify-content: center;
+}
+
+
+/* =========================================================
+   LEGENDA
+========================================================= */
+
+.hl-legend {
+    margin-bottom: 16px;
+    padding: 14px 18px;
+
+    border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.hl-legend summary {
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--green-dark);
+}
+
+.hl-legend summary:focus-visible {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 3px;
+}
+
+.hl-legend-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-top: 12px;
+    list-style: none;
+}
+
+.hl-legend-list li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.hl-legend-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.hl-legend-swatch.hl-swatch-promessa  { background: var(--hl-promessa-bg); }
+.hl-legend-swatch.hl-swatch-oracao     { background: var(--hl-oracao-bg); }
+.hl-legend-swatch.hl-swatch-sabedoria  { background: var(--hl-sabedoria-bg); }
+.hl-legend-swatch.hl-swatch-atencao    { background: var(--hl-atencao-bg); }
+.hl-legend-swatch.hl-swatch-gratidao   { background: var(--hl-gratidao-bg); }
+
+
+/* =========================================================
+   RESUMO "MINHAS ANOTAÇÕES NESTE CAPÍTULO"
+========================================================= */
+
+.hl-summary {
+    margin-bottom: 20px;
+}
+
+.hl-summary-title {
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green-dark);
+}
+
+.hl-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+}
+
+.hl-summary-item {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.hl-summary-jump {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.hl-summary-jump:focus-visible {
+    outline: 2px solid var(--green-dark);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.hl-summary-verse {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--green);
+    font-size: 12px;
+}
+
+.hl-summary-text {
+    flex: 1;
+    font-size: 13px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hl-summary-note {
+    margin-top: 6px;
+    padding-left: 30px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+
+/* =========================================================
+   MOVIMENTO REDUZIDO
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .hl-toolbar-swatch,
+    .hl-chip,
+    .hl-theme-option {
+        transition: none;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 600px) {
+    .hl-dialog-form {
+        padding: 22px;
+    }
+
+    .hl-legend-list {
+        gap: 8px 12px;
+    }
+}
