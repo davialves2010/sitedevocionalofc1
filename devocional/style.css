@@ -2417,3 +2417,33 @@ body.dark .navigation {
     font-size: 17px;
     color: var(--text);
 }
+
+
+/* =========================================
+   JORNADA EMOCIONAL (GRÁFICOS)
+========================================= */
+
+.journey-chart-card {
+    padding: 22px;
+    margin-bottom: 18px;
+    border-radius: 24px;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+
+    box-shadow: var(--shadow);
+}
+
+.journey-chart-card h2 {
+    margin-bottom: 16px;
+    font-family: "Playfair Display", serif;
+    font-size: 19px;
+}
+
+.journey-chart-empty {
+    padding: 20px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
