@@ -1242,6 +1242,7 @@ if (moreStatsButton) {
     moreStatsButton.addEventListener("click", () => {
         showScreen("statsScreen");
         renderStatsScreen();
+        renderJourneyCharts();
     });
 }
 
@@ -3222,4 +3223,183 @@ if (personalDevotionalDetailBackButton) {
     personalDevotionalDetailBackButton.addEventListener("click", () => {
         closeOverlay(personalDevotionalDetailOverlay);
     });
+}
+
+/* =========================================================
+   JORNADA EMOCIONAL (GRÁFICOS)
+========================================================= */
+
+let emotionCategoryChartInstance = null;
+let journeyTimelineChartInstance = null;
+
+const EMOTION_CATEGORY_COLORS = {
+    "Ansiedade": "#c98a4b",
+    "Tristeza": "#6b7c93",
+    "Gratidão": "#61a37a",
+    "Paz": "#7fae8a",
+    "Esperança": "#e0a95c",
+    "Medo": "#a55b5b",
+    "Alegria": "#e0c95c",
+    "Cansaço": "#8f8f8f",
+    "Dúvida": "#9c8bc9",
+    "Confiança": "#4c7a6b",
+    "Outro": "#b7bfb8"
+};
+
+function buildCategoryCounts(history) {
+    const counts = {};
+
+    history.forEach(entry => {
+        const category = entry.emotionCategory || "Outro";
+        counts[category] = (counts[category] || 0) + 1;
+    });
+
+    return counts;
+}
+
+function buildMonthlyCounts(history) {
+    const now = new Date();
+    const months = [];
+
+    for (let i = 5; i >= 0; i--) {
+        const cursor = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({
+            key: `${cursor.getFullYear()}-${pad(cursor.getMonth() + 1)}`,
+            label: cursor.toLocaleDateString("pt-BR", { month: "short" })
+        });
+    }
+
+    const counts = Object.fromEntries(months.map(m => [m.key, 0]));
+
+    history.forEach(entry => {
+        const entryDate = new Date(entry.createdAt);
+        const key = `${entryDate.getFullYear()}-${pad(entryDate.getMonth() + 1)}`;
+
+        if (counts[key] !== undefined) {
+            counts[key]++;
+        }
+    });
+
+    return {
+        labels: months.map(m => m.label),
+        values: months.map(m => counts[m.key])
+    };
+}
+
+function getCssVariable(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+function setJourneyChartsVisible(visible) {
+    const categoryCanvas = $("emotionCategoryChart");
+    const timelineCanvas = $("journeyTimelineChart");
+
+    if (categoryCanvas) categoryCanvas.classList.toggle("hidden", !visible);
+    if (timelineCanvas) timelineCanvas.classList.toggle("hidden", !visible);
+}
+
+function showJourneyChartMessage(message) {
+    const emptyMessage = $("journeyChartEmpty");
+
+    if (!emptyMessage) return;
+
+    emptyMessage.textContent = message;
+    emptyMessage.classList.remove("hidden");
+    setJourneyChartsVisible(false);
+}
+
+async function renderJourneyCharts() {
+    const categoryCanvas = $("emotionCategoryChart");
+    const timelineCanvas = $("journeyTimelineChart");
+    const emptyMessage = $("journeyChartEmpty");
+
+    if (!categoryCanvas || !timelineCanvas || typeof Chart === "undefined") return;
+
+    if (!isLoggedIn()) {
+        showJourneyChartMessage("Entre na sua conta para ver sua jornada emocional.");
+        return;
+    }
+
+    try {
+        const { data } = await apiRequest("/api/data", { method: "GET" });
+        const history = data.personalDevotionals || [];
+
+        if (!history.length) {
+            showJourneyChartMessage(
+                "Ainda não há devocionais pessoais suficientes para gerar seu gráfico."
+            );
+            return;
+        }
+
+        if (emptyMessage) emptyMessage.classList.add("hidden");
+        setJourneyChartsVisible(true);
+
+        /* ---------- Gráfico 1: distribuição por sentimento ---------- */
+
+        const counts = buildCategoryCounts(history);
+        const categories = Object.keys(counts);
+        const values = Object.values(counts);
+        const colors = categories.map(
+            category => EMOTION_CATEGORY_COLORS[category] || EMOTION_CATEGORY_COLORS.Outro
+        );
+
+        if (emotionCategoryChartInstance) {
+            emotionCategoryChartInstance.destroy();
+        }
+
+        emotionCategoryChartInstance = new Chart(categoryCanvas, {
+            type: "doughnut",
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: { color: getCssVariable("--text") }
+                    }
+                }
+            }
+        });
+
+        /* ---------- Gráfico 2: frequência ao longo do tempo ---------- */
+
+        const timeline = buildMonthlyCounts(history);
+
+        if (journeyTimelineChartInstance) {
+            journeyTimelineChartInstance.destroy();
+        }
+
+        journeyTimelineChartInstance = new Chart(timelineCanvas, {
+            type: "bar",
+            data: {
+                labels: timeline.labels,
+                datasets: [{
+                    label: "Devocionais gerados",
+                    data: timeline.values,
+                    backgroundColor: getCssVariable("--green"),
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: getCssVariable("--muted") } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0, color: getCssVariable("--muted") }
+                    }
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        showJourneyChartMessage("Não foi possível carregar sua jornada agora.");
+    }
 }
