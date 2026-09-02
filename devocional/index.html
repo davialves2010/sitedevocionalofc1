@@ -40,200 +40,122 @@
     <main class="app">
 
         <!-- =====================================================
-             TELA: HOJE
-        ====================================================== -->
-        <section id="homeScreen" class="screen active-screen">
+     TELA: HOJE
+====================================================== -->
+<section id="homeScreen" class="screen active-screen">
 
-            <header class="header">
-                <div>
-                    <span class="small-title">SEU MOMENTO COM DEUS</span>
-                    <h1>Bom dia, <span>amigo.</span></h1>
-                </div>
+    <header class="header">
+        <div>
+            <span class="small-title">SEU MOMENTO COM DEUS</span>
+            <h1>Bom dia, <span>amigo.</span></h1>
+        </div>
 
-                <button id="themeButton" class="profile-button" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-            </header>
+        <button id="themeButton" class="profile-button" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    </header>
 
-            <!-- DATA -->
-            <section class="date-section">
-                <span id="today">Carregando...</span>
+    <!-- DATA -->
+    <section class="date-section">
+        <span id="today">Carregando...</span>
 
-                <div class="streak">
-                    <svg id="homeFlameIcon" class="flame-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                    <strong id="streak">1</strong>
-                    <span>dia</span>
-                </div>
-            </section>
+        <div class="streak">
+            <svg id="homeFlameIcon" class="flame-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            <strong id="streak">1</strong>
+            <span>dia</span>
+        </div>
+    </section>
 
-            <!-- VERSÍCULO -->
-            <section class="verse-card">
-                <div class="verse-top">
-                    <span class="label">PALAVRA DE HOJE</span>
+    <!-- VERSÍCULO -->
+    <section class="verse-card">
+        <div class="verse-top">
+            <span class="label">PALAVRA DE HOJE</span>
 
-                    <div class="verse-top-actions">
-                        <button id="shareVerseButton" class="favorite" aria-label="Compartilhar">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        </button>
-                        <button id="favoriteButton" class="favorite" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
-                    </div>
-                </div>
-
-                <div id="loading" class="loading">Carregando a Palavra...</div>
-
-                <div id="verseContent" class="hidden">
-                    <p id="verseText" class="verse-text"></p>
-                    <p id="verseReference" class="verse-reference"></p>
-                </div>
-
-                <div id="verseError" class="verse-error hidden"></div>
-
-                <button id="randomVerseButton" class="random-button">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                    Outro versículo
+            <div class="verse-top-actions">
+                <button id="shareVerseButton" class="favorite" aria-label="Compartilhar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </button>
-            </section>
+                <button id="favoriteButton" class="favorite" aria-label="Favoritar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+            </div>
+        </div>
 
-            <!-- =================================================
-                 DEVOCIONAL DIÁRIO (gerado por IA)
-            ================================================== -->
-            <section class="devotional-daily" id="devotionalDaily">
+        <div id="loading" class="loading">Carregando a Palavra...</div>
 
-                <span class="section-label">DEVOCIONAL DE HOJE</span>
+        <div id="verseContent" class="hidden">
+            <p id="verseText" class="verse-text"></p>
+            <p id="verseReference" class="verse-reference"></p>
+        </div>
 
-                <div id="devotionalLoading" class="devotional-loading">
-                    <div class="skeleton skeleton-block" style="height: 88px;"></div>
-                    <div class="skeleton skeleton-block" style="height: 130px;"></div>
-                    <div class="skeleton skeleton-line w-50"></div>
-                    <div class="skeleton skeleton-line w-100"></div>
-                    <div class="skeleton skeleton-line w-90"></div>
-                    <div class="skeleton skeleton-line w-70"></div>
-                </div>
+        <div id="verseError" class="verse-error hidden"></div>
 
-                <div id="devotionalContent" class="hidden">
+        <button id="randomVerseButton" class="random-button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Outro versículo
+        </button>
+    </section>
 
-                    <blockquote id="devotionalQuote" class="devotional-quote"></blockquote>
+    <!-- =================================================
+         ATALHOS: DEVOCIONAL DE HOJE E DEVOCIONAL PESSOAL
+    ================================================== -->
+    <div class="menu-card home-shortcuts-card">
+        <button id="openDailyDevotionalButton" class="menu-button" type="button">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            <div>
+                <strong>Devocional de hoje</strong>
+                <small>Sua reflexão diária com um versículo temático</small>
+            </div>
+            <b>›</b>
+        </button>
 
-                    <div class="devotional-passage">
-                        <span class="label">PASSAGEM DO DIA</span>
-                        <p id="devotionalVerseText" class="devotional-verse-text"></p>
-                        <p id="devotionalVerseRef" class="devotional-verse-ref"></p>
-                    </div>
-
-                    <div class="devotional-reflection">
-                        <h2 id="devotionalTitle"></h2>
-                        <div id="devotionalParagraphs"></div>
-                    </div>
-
-                    <button id="devotionalCompleteButton" class="devotional-complete-button" type="button">
-                        Concluir devocional de hoje
-                    </button>
-
-                    <button id="shareDevotionalButton" class="share-button" type="button">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        Compartilhar
-                    </button>
-
-                </div>
-
-                <div id="devotionalError" class="verse-error hidden"></div>
-
-            </section>
-
-
-
-            <!-- =================================================
-     DEVOCIONAL CONVERSACIONAL / PESSOAL
-================================================== -->
-<section class="personal-devotional" id="personalDevotional">
-
-    <span class="section-label">COMO VOCÊ ESTÁ SE SENTINDO?</span>
-
-    <div class="personal-devotional-box">
-        <textarea
-            id="personalFeelingInput"
-            placeholder="Escreva livremente... ex: estou ansioso com uma decisão importante"
-            maxlength="500"
-        ></textarea>
-
-        <button id="personalDevotionalButton" class="primary-button" type="button">
-            Gerar meu devocional
+        <button id="openPersonalDevotionalButton" class="menu-button" type="button">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            </span>
+            <div>
+                <strong>Como você está se sentindo?</strong>
+                <small>Um devocional pessoal para o seu momento</small>
+            </div>
+            <b>›</b>
         </button>
     </div>
 
-    <div id="personalDevotionalLoading" class="devotional-loading hidden">
-        <div class="skeleton skeleton-block" style="height: 88px;"></div>
-        <div class="skeleton skeleton-block" style="height: 130px;"></div>
-        <div class="skeleton skeleton-line w-50"></div>
-        <div class="skeleton skeleton-line w-100"></div>
-        <div class="skeleton skeleton-line w-90"></div>
-    </div>
+    <!-- ATALHO PLANOS DE LEITURA -->
+    <section class="prayer-card">
+        <div class="prayer-icon" id="planShortcutIcon">📅</div>
 
-    <div id="personalDevotionalResult" class="hidden">
+        <div class="prayer-content">
+            <span class="section-label" id="planShortcutLabel">PLANOS DE LEITURA</span>
+            <h2 id="planShortcutTitle">Siga uma trilha</h2>
+            <p id="planShortcutDescription">Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.</p>
 
-        <div class="devotional-passage">
-            <span class="label" id="personalDevotionalReference"></span>
-            <p id="personalDevotionalVerses" class="devotional-verse-text"></p>
+            <div class="plan-progress-bar hidden" id="planShortcutProgressBar">
+                <div id="planShortcutProgressFill" class="plan-progress-fill"></div>
+            </div>
         </div>
 
-        <div class="devotional-reflection">
-            <h2 id="personalDevotionalTitle"></h2>
-            <p id="personalDevotionalReflection"></p>
-        </div>
+        <button id="plansShortcutButton">Ver planos</button>
+    </section>
 
-        <div class="devotional-quote" id="personalDevotionalPrayer"></div>
+    <!-- ORAÇÃO E DIÁRIO -->
+    <div class="quick-actions-row">
 
-        <p class="personal-devotional-support-note" id="personalDevotionalSupportNote"></p>
+        <button id="prayerButton" class="quick-action-tile" type="button">
+            <span class="quick-action-icon">🙏</span>
+            <strong>Oração</strong>
+            <small>Converse com Deus</small>
+        </button>
 
-        <button id="personalDevotionalNewButton" class="secondary-button" type="button">
-            Escrever outro desabafo
+        <button id="noteButton" class="quick-action-tile" type="button">
+            <span class="quick-action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </span>
+            <strong>Diário</strong>
+            <small>Escreva uma reflexão</small>
         </button>
 
     </div>
-
-    <div id="personalDevotionalError" class="verse-error hidden"></div>
 
 </section>
-
-
-
-            
-
-            <!-- ATALHO PLANOS DE LEITURA -->
-            <section class="prayer-card">
-                <div class="prayer-icon" id="planShortcutIcon">📅</div>
-
-                <div class="prayer-content">
-                    <span class="section-label" id="planShortcutLabel">PLANOS DE LEITURA</span>
-                    <h2 id="planShortcutTitle">Siga uma trilha</h2>
-                    <p id="planShortcutDescription">Percorra a Bíblia em trilhas guiadas, no seu ritmo, dia após dia.</p>
-
-                    <div class="plan-progress-bar hidden" id="planShortcutProgressBar">
-                        <div id="planShortcutProgressFill" class="plan-progress-fill"></div>
-                    </div>
-                </div>
-
-                <button id="plansShortcutButton">Ver planos</button>
-            </section>
-
-            <!-- ORAÇÃO E DIÁRIO -->
-            <div class="quick-actions-row">
-
-                <button id="prayerButton" class="quick-action-tile" type="button">
-                    <span class="quick-action-icon">🙏</span>
-                    <strong>Oração</strong>
-                    <small>Converse com Deus</small>
-                </button>
-
-                <button id="noteButton" class="quick-action-tile" type="button">
-                    <span class="quick-action-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-                    </span>
-                    <strong>Diário</strong>
-                    <small>Escreva uma reflexão</small>
-                </button>
-
-            </div>
-
-        </section>
 
 
         <!-- =====================================================
