@@ -3103,6 +3103,16 @@ if (personalDevotionalBackButton) {
 
 const personalDevotionalsHistoryList = $("personalDevotionalsHistoryList");
 
+const personalDevotionalDetailOverlay = $("personalDevotionalDetailOverlay");
+const personalDevotionalDetailBackButton = $("personalDevotionalDetailBackButton");
+const personalDevotionalDetailDate = $("personalDevotionalDetailDate");
+const personalDevotionalDetailFeeling = $("personalDevotionalDetailFeeling");
+const personalDevotionalDetailReference = $("personalDevotionalDetailReference");
+const personalDevotionalDetailVerses = $("personalDevotionalDetailVerses");
+const personalDevotionalDetailTitle = $("personalDevotionalDetailTitle");
+const personalDevotionalDetailReflection = $("personalDevotionalDetailReflection");
+const personalDevotionalDetailPrayer = $("personalDevotionalDetailPrayer");
+
 function formatHistoryDate(isoString) {
     const dateObject = new Date(isoString);
 
@@ -3112,6 +3122,11 @@ function formatHistoryDate(isoString) {
         month: "long",
         year: "numeric"
     });
+}
+
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return `${text.slice(0, maxLength).trim()}…`;
 }
 
 async function renderPersonalDevotionalsHistory() {
@@ -3129,8 +3144,8 @@ async function renderPersonalDevotionalsHistory() {
     }
 
     personalDevotionalsHistoryList.innerHTML = `
-        <div class="skeleton skeleton-block" style="height: 130px;"></div>
-        <div class="skeleton skeleton-block" style="height: 130px;"></div>
+        <div class="skeleton skeleton-block" style="height: 90px;"></div>
+        <div class="skeleton skeleton-block" style="height: 90px;"></div>
     `;
 
     try {
@@ -3151,41 +3166,31 @@ async function renderPersonalDevotionalsHistory() {
         personalDevotionalsHistoryList.innerHTML = "";
 
         history.forEach(entry => {
-            const item = document.createElement("article");
-            item.className = "personal-devotional-history-item";
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "personal-devotional-history-button";
 
             const date = document.createElement("span");
-            date.className = "personal-devotional-history-date";
+            date.className = "personal-devotional-history-button-date";
             date.textContent = formatHistoryDate(entry.createdAt);
 
-            const feeling = document.createElement("p");
-            feeling.className = "personal-devotional-history-feeling";
-            feeling.textContent = `"${entry.feeling}"`;
+            const feeling = document.createElement("span");
+            feeling.className = "personal-devotional-history-button-feeling";
+            feeling.textContent = `"${truncateText(entry.feeling, 80)}"`;
 
-            const reference = document.createElement("span");
-            reference.className = "personal-devotional-history-reference";
-            reference.textContent = entry.reference;
-
-            const verses = document.createElement("p");
-            verses.className = "personal-devotional-history-verses";
-            verses.textContent = `"${entry.verses}"`;
-
-            const title = document.createElement("h3");
-            title.className = "personal-devotional-history-title";
+            const title = document.createElement("span");
+            title.className = "personal-devotional-history-button-title";
             title.textContent = entry.devotionalTitle;
 
-            const reflection = document.createElement("p");
-            reflection.className = "personal-devotional-history-reflection";
-            reflection.textContent = entry.reflection;
+            button.appendChild(date);
+            button.appendChild(feeling);
+            button.appendChild(title);
 
-            item.appendChild(date);
-            item.appendChild(feeling);
-            item.appendChild(reference);
-            item.appendChild(verses);
-            item.appendChild(title);
-            item.appendChild(reflection);
+            button.addEventListener("click", () => {
+                openPersonalDevotionalDetail(entry);
+            });
 
-            personalDevotionalsHistoryList.appendChild(item);
+            personalDevotionalsHistoryList.appendChild(button);
         });
 
     } catch (error) {
@@ -3199,4 +3204,22 @@ async function renderPersonalDevotionalsHistory() {
             </div>
         `;
     }
+}
+
+function openPersonalDevotionalDetail(entry) {
+    personalDevotionalDetailDate.textContent = formatHistoryDate(entry.createdAt);
+    personalDevotionalDetailFeeling.textContent = `"${entry.feeling}"`;
+    personalDevotionalDetailReference.textContent = entry.reference;
+    personalDevotionalDetailVerses.textContent = `"${entry.verses}"`;
+    personalDevotionalDetailTitle.textContent = entry.devotionalTitle;
+    personalDevotionalDetailReflection.textContent = entry.reflection;
+    personalDevotionalDetailPrayer.textContent = entry.prayer;
+
+    openOverlay(personalDevotionalDetailOverlay);
+}
+
+if (personalDevotionalDetailBackButton) {
+    personalDevotionalDetailBackButton.addEventListener("click", () => {
+        closeOverlay(personalDevotionalDetailOverlay);
+    });
 }
