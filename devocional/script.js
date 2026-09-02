@@ -3035,3 +3035,68 @@ if (personalDevotionalNewButton) {
         personalFeelingInput.focus();
     });
 }
+
+/* =========================================================
+   MODAIS: DEVOCIONAL DE HOJE E DEVOCIONAL PESSOAL
+========================================================= */
+
+const openDailyDevotionalButton = $("openDailyDevotionalButton");
+const dailyDevotionalModal = $("dailyDevotionalModal");
+const closeDailyDevotionalModal = $("closeDailyDevotionalModal");
+
+const openPersonalDevotionalButton = $("openPersonalDevotionalButton");
+const personalDevotionalModal = $("personalDevotionalModal");
+const closePersonalDevotionalModal = $("closePersonalDevotionalModal");
+
+function openModal(modal) {
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closeModal(modal) {
+    if (modal) modal.classList.add("hidden");
+}
+
+/* --- Devocional de hoje --- */
+
+if (openDailyDevotionalButton) {
+    openDailyDevotionalButton.addEventListener("click", () => {
+        openModal(dailyDevotionalModal);
+    });
+}
+
+if (closeDailyDevotionalModal) {
+    closeDailyDevotionalModal.addEventListener("click", () => {
+        closeModal(dailyDevotionalModal);
+    });
+}
+
+if (dailyDevotionalModal) {
+    dailyDevotionalModal.addEventListener("click", event => {
+        if (event.target === dailyDevotionalModal) {
+            closeModal(dailyDevotionalModal);
+        }
+    });
+}
+
+/* --- Devocional pessoal --- */
+
+if (openPersonalDevotionalButton) {
+    openPersonalDevotionalButton.addEventListener("click", () => {
+        openModal(personalDevotionalModal);
+        if (personalFeelingInput) personalFeelingInput.focus();
+    });
+}
+
+if (closePersonalDevotionalModal) {
+    closePersonalDevotionalModal.addEventListener("click", () => {
+        closeModal(personalDevotionalModal);
+    });
+}
+
+if (personalDevotionalModal) {
+    personalDevotionalModal.addEventListener("click", event => {
+        if (event.target === personalDevotionalModal) {
+            closeModal(personalDevotionalModal);
+        }
+    });
+}
