@@ -2241,3 +2241,64 @@ body.dark .navigation {
 .home-shortcuts-card {
     margin: 20px 0;
 }
+
+/* =========================================
+   OVERLAY DE TELA CHEIA
+   (Devocional de hoje / Devocional pessoal)
+========================================= */
+
+.fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    background: var(--background);
+}
+
+.fullscreen-overlay-inner {
+    width: min(100%, 720px);
+    margin: auto;
+    padding: 35px 25px 60px;
+}
+
+@media (min-width: 900px) {
+    .fullscreen-overlay-inner {
+        max-width: 640px;
+        margin: 40px auto 0;
+        padding: 45px 45px 60px;
+    }
+}
+
+/* Reaproveita os estilos que já existem para o conteúdo do devocional
+   diário e pessoal (.devotional-loading, .devotional-quote,
+   .devotional-passage, .devotional-reflection, .personal-devotional-box,
+   .personal-devotional-support-note) — não precisam ser redeclarados. */
+
+.personal-devotional-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.personal-devotional-box textarea {
+    min-height: 110px;
+}
+
+.personal-devotional-support-note {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#personalDevotionalNewButton {
+    width: 100%;
+    margin-top: 10px;
+}
