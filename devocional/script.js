@@ -630,7 +630,7 @@ async function loadDevotional() {
     devotionalError.classList.add("hidden");
 
     try {
-        const response = await fetch("/api/devotional");
+        const response = await fetch(`${BACKEND_URL}/api/devotional`);
 
         if (!response.ok) {
             throw new Error(`Erro HTTP ${response.status}`);
