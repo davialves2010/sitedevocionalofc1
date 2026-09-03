@@ -1724,6 +1724,8 @@ body.dark .navigation {
 
 .paths-navigation {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: 8px;
     margin: 20px 0;
     padding: 6px;
@@ -1743,7 +1745,8 @@ body.dark .navigation {
 
 .paths-tab {
     flex: 0 0 auto;
-    display: flex;
+    width: auto;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
