@@ -1718,6 +1718,10 @@ body.dark .navigation {
    CAMINHOS
 ========================================= */
 
+/* =========================================
+   CAMINHOS
+========================================= */
+
 .paths-navigation {
     display: flex;
     gap: 8px;
@@ -1759,6 +1763,20 @@ body.dark .navigation {
 .paths-tab.active {
     background: var(--green);
     color: white;
+}
+
+.tab-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.path-content {
+    display: none;
+}
+
+.path-content.active-path {
+    display: block;
 }
 
 /* =========================================
