@@ -2197,7 +2197,7 @@ async function loadPlanDay(plan, day) {
         if (cached) {
             data = JSON.parse(cached);
         } else {
-            const response = await fetch(`/api/plan-reading?plan=${plan.id}&day=${day}`);
+            const response = await fetch(`${BACKEND_URL}/api/plan-reading?plan=${plan.id}&day=${day}`);
 
             if (!response.ok) {
                 throw new Error(`Erro HTTP ${response.status}`);
