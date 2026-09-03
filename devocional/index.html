@@ -293,6 +293,11 @@
     <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
     <span>Grifos</span>
 </button>
+
+                <button class="paths-tab" data-path="groups" type="button">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Grupos</span>
+</button>
                 
 </div>
 
@@ -367,6 +372,92 @@
                 </div>
 
             </div>
+
+
+            <!-- GRUPOS -->
+<div id="groups" class="path-content">
+
+    <div id="groupsList">
+
+        <div class="quick-reference groups-join-card">
+            <span class="section-label">ENTRAR COM CÓDIGO</span>
+            <div class="quick-reference-box">
+                <input id="joinGroupCodeInput" type="text" placeholder="Ex: 7XKPQ2" maxlength="6" autocomplete="off">
+                <button id="joinGroupButton">Entrar</button>
+            </div>
+            <small id="joinGroupStatus"></small>
+        </div>
+
+        <button id="createGroupButton" class="primary-button" type="button" style="margin-bottom:18px;">
+            + Criar grupo novo
+        </button>
+
+        <div id="myGroupsList" class="plans-list"></div>
+
+    </div>
+
+    <div id="groupDetail" class="hidden">
+
+        <button id="groupBackButton" class="plan-back-button" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar aos grupos
+        </button>
+
+        <div class="page-header">
+            <span class="section-label" id="groupDetailPlanLabel"></span>
+            <h1 id="groupDetailName"></h1>
+        </div>
+
+        <div class="quick-reference group-invite-card">
+            <span class="section-label">CÓDIGO DE CONVITE</span>
+            <div class="quick-reference-box">
+                <input id="groupInviteCodeDisplay" type="text" readonly>
+                <button id="copyInviteCodeButton">Copiar</button>
+            </div>
+            <small>Compartilhe com quem você quiser convidar (máx. 10 pessoas).</small>
+        </div>
+
+        <div id="groupMembersList"></div>
+
+        <div class="group-posts-section">
+            <span class="section-label">REFLEXÕES DO GRUPO</span>
+
+            <div class="personal-devotional-box" style="margin: 12px 0 20px;">
+                <textarea id="groupPostInput" placeholder="Compartilhe algo sobre a leitura de hoje..." maxlength="1000"></textarea>
+                <button id="shareGroupPostButton" class="primary-button" type="button">Compartilhar com o grupo</button>
+            </div>
+
+            <div id="groupPostsList"></div>
+        </div>
+
+        <button id="leaveGroupButton" class="menu-button danger" type="button" style="margin-top:20px;">
+            Sair do grupo
+        </button>
+
+    </div>
+
+</div>
+
+<!-- MODAL: CRIAR GRUPO -->
+<div id="createGroupModal" class="modal hidden">
+    <div class="modal-content">
+        <button id="closeCreateGroupModal" class="close" type="button">×</button>
+        <span class="section-label">NOVO GRUPO</span>
+        <h2>Criar grupo</h2>
+
+        <label style="display:block;margin:16px 0 8px;font-size:12px;font-weight:700;color:var(--muted);">Nome do grupo</label>
+        <input id="newGroupNameInput" type="text" placeholder="Ex: Grupo da família" maxlength="60">
+
+        <label style="display:block;margin:16px 0 8px;font-size:12px;font-weight:700;color:var(--muted);">Plano de leitura</label>
+        <select id="newGroupPlanSelect"></select>
+
+        <div id="createGroupError" class="verse-error hidden" style="margin-top:12px;"></div>
+
+        <button id="submitCreateGroupButton" class="primary-button" type="button" style="margin-top:20px;">Criar grupo</button>
+    </div>
+</div>
+
+            
 
             <!-- VERSÍCULOS SALVOS -->
             <div id="savedVerses" class="path-content">
