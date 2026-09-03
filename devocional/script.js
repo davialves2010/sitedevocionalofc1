@@ -1734,6 +1734,12 @@ pathTabs.forEach(tab => {
        if (target === "highlights") {
     renderHighlightsList();
 }
+       
+       if (target === "groups") {
+    groupDetail.classList.add("hidden");
+    groupsList.classList.remove("hidden");
+    loadMyGroups();
+}
     });
 });
 
@@ -2317,6 +2323,464 @@ function completePlanDay(plan, day) {
         planCompleteButton.disabled = true;
     }
 }
+
+
+
+
+
+/* =========================================================
+   GRUPOS DE LEITURA
+========================================================= */
+
+const groupsList = $("groupsList");
+const groupDetail = $("groupDetail");
+const myGroupsList = $("myGroupsList");
+const joinGroupCodeInput = $("joinGroupCodeInput");
+const joinGroupButton = $("joinGroupButton");
+const joinGroupStatus = $("joinGroupStatus");
+const createGroupButton = $("createGroupButton");
+const createGroupModal = $("createGroupModal");
+const closeCreateGroupModalButton = $("closeCreateGroupModal");
+const newGroupNameInput = $("newGroupNameInput");
+const newGroupPlanSelect = $("newGroupPlanSelect");
+const createGroupError = $("createGroupError");
+const submitCreateGroupButton = $("submitCreateGroupButton");
+const groupBackButton = $("groupBackButton");
+const groupDetailPlanLabel = $("groupDetailPlanLabel");
+const groupDetailName = $("groupDetailName");
+const groupInviteCodeDisplay = $("groupInviteCodeDisplay");
+const copyInviteCodeButton = $("copyInviteCodeButton");
+const groupMembersList = $("groupMembersList");
+const groupPostInput = $("groupPostInput");
+const shareGroupPostButton = $("shareGroupPostButton");
+const groupPostsList = $("groupPostsList");
+const leaveGroupButton = $("leaveGroupButton");
+
+let currentGroupId = null;
+let currentGroupData = null;
+
+function planTitleById(planId) {
+    const plan = PLANS.find(item => item.id === planId);
+    return plan ? plan.title : planId;
+}
+
+function populateGroupPlanSelect() {
+    if (!newGroupPlanSelect) return;
+
+    newGroupPlanSelect.innerHTML = "";
+
+    PLANS.forEach(plan => {
+        const option = document.createElement("option");
+        option.value = plan.id;
+        option.textContent = `${plan.icon} ${plan.title}`;
+        newGroupPlanSelect.appendChild(option);
+    });
+}
+
+/* --- Lista de grupos --- */
+
+async function loadMyGroups() {
+    if (!myGroupsList) return;
+
+    if (!isLoggedIn()) {
+        myGroupsList.innerHTML = `
+            <div class="empty-state">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+                <h2>Entre na sua conta</h2>
+                <p>Crie uma conta ou entre para participar de grupos com amigos.</p>
+            </div>
+        `;
+        return;
+    }
+
+    myGroupsList.innerHTML = `<div class="skeleton skeleton-block" style="height: 90px;"></div>`;
+
+    try {
+        const { groups } = await apiRequest("/api/groups", { method: "GET" });
+
+        if (!groups.length) {
+            myGroupsList.innerHTML = `
+                <div class="empty-state">
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+                    <h2>Nenhum grupo ainda</h2>
+                    <p>Crie um grupo ou entre com um código de convite.</p>
+                </div>
+            `;
+            return;
+        }
+
+        myGroupsList.innerHTML = "";
+
+        groups.forEach(group => {
+            const card = document.createElement("article");
+            card.className = "plan-card";
+
+            const icon = document.createElement("span");
+            icon.className = "plan-icon";
+            icon.textContent = "👥";
+
+            const info = document.createElement("div");
+            info.className = "plan-card-info";
+
+            const title = document.createElement("strong");
+            title.textContent = group.name;
+
+            const subtitle = document.createElement("small");
+            subtitle.textContent = `${planTitleById(group.planId)} · ${group.memberCount}/10 pessoas`;
+
+            info.appendChild(title);
+            info.appendChild(subtitle);
+
+            const actionButton = document.createElement("button");
+            actionButton.className = "plan-action-button";
+            actionButton.textContent = "Ver grupo";
+            actionButton.addEventListener("click", () => openGroupDetail(group.id));
+
+            card.appendChild(icon);
+            card.appendChild(info);
+            card.appendChild(actionButton);
+
+            myGroupsList.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error(error);
+        myGroupsList.innerHTML = `
+            <div class="empty-state">
+                <h2>Não foi possível carregar</h2>
+                <p>Tente novamente em alguns instantes.</p>
+            </div>
+        `;
+    }
+}
+
+/* --- Criar grupo --- */
+
+if (createGroupButton) {
+    createGroupButton.addEventListener("click", () => {
+        if (!isLoggedIn()) {
+            alert("Entre na sua conta pra criar um grupo.");
+            return;
+        }
+
+        populateGroupPlanSelect();
+        newGroupNameInput.value = "";
+        createGroupError.classList.add("hidden");
+        createGroupModal.classList.remove("hidden");
+    });
+}
+
+if (closeCreateGroupModalButton) {
+    closeCreateGroupModalButton.addEventListener("click", () => {
+        createGroupModal.classList.add("hidden");
+    });
+}
+
+if (createGroupModal) {
+    createGroupModal.addEventListener("click", event => {
+        if (event.target === createGroupModal) {
+            createGroupModal.classList.add("hidden");
+        }
+    });
+}
+
+if (submitCreateGroupButton) {
+    submitCreateGroupButton.addEventListener("click", async () => {
+        const name = newGroupNameInput.value.trim();
+
+        if (!name) {
+            createGroupError.textContent = "Dê um nome para o grupo.";
+            createGroupError.classList.remove("hidden");
+            return;
+        }
+
+        submitCreateGroupButton.disabled = true;
+
+        try {
+            const { group } = await apiRequest("/api/groups", {
+                method: "POST",
+                body: JSON.stringify({ name, planId: newGroupPlanSelect.value })
+            });
+
+            createGroupModal.classList.add("hidden");
+
+            await loadMyGroups();
+            openGroupDetail(group.id);
+
+        } catch (error) {
+            createGroupError.textContent = error.message || "Não foi possível criar o grupo.";
+            createGroupError.classList.remove("hidden");
+        } finally {
+            submitCreateGroupButton.disabled = false;
+        }
+    });
+}
+
+/* --- Entrar com código --- */
+
+if (joinGroupButton) {
+    joinGroupButton.addEventListener("click", async () => {
+        if (!isLoggedIn()) {
+            alert("Entre na sua conta pra participar de um grupo.");
+            return;
+        }
+
+        const code = joinGroupCodeInput.value.trim();
+
+        if (!code) {
+            joinGroupStatus.textContent = "Digite um código de convite.";
+            return;
+        }
+
+        joinGroupButton.disabled = true;
+        joinGroupStatus.textContent = "Entrando...";
+
+        try {
+            const { group } = await apiRequest("/api/groups/join", {
+                method: "POST",
+                body: JSON.stringify({ inviteCode: code })
+            });
+
+            joinGroupCodeInput.value = "";
+            joinGroupStatus.textContent = "";
+
+            await loadMyGroups();
+            openGroupDetail(group.id);
+
+        } catch (error) {
+            joinGroupStatus.textContent = error.message || "Não foi possível entrar no grupo.";
+        } finally {
+            joinGroupButton.disabled = false;
+        }
+    });
+}
+
+/* --- Detalhe do grupo --- */
+
+async function openGroupDetail(groupId) {
+    currentGroupId = groupId;
+
+    groupsList.classList.add("hidden");
+    groupDetail.classList.remove("hidden");
+
+    groupMembersList.innerHTML = `<div class="skeleton skeleton-block" style="height: 60px;"></div>`;
+    groupPostsList.innerHTML = "";
+
+    try {
+        const data = await apiRequest(`/api/groups/${groupId}`, { method: "GET" });
+        currentGroupData = data;
+        renderGroupDetail(data);
+        loadGroupPosts(groupId);
+
+    } catch (error) {
+        console.error(error);
+        groupMembersList.innerHTML = `
+            <div class="empty-state">
+                <h2>Não foi possível carregar</h2>
+                <p>Tente novamente em alguns instantes.</p>
+            </div>
+        `;
+    }
+}
+
+function renderGroupDetail(data) {
+    const { group, members, planDuration } = data;
+
+    groupDetailName.textContent = group.name;
+    groupDetailPlanLabel.textContent = planTitleById(group.planId).toUpperCase();
+    groupInviteCodeDisplay.value = group.inviteCode;
+
+    groupMembersList.innerHTML = "";
+
+    members.forEach(member => {
+        const item = document.createElement("div");
+        item.className = "group-member-item";
+
+        const info = document.createElement("div");
+        info.className = "group-member-info";
+
+        const name = document.createElement("strong");
+        name.textContent = member.name;
+
+        const status = document.createElement("small");
+        status.textContent = member.isFinished
+            ? `Plano concluído · ${planDuration}/${planDuration} dias`
+            : `Dia ${member.currentDay} de ${planDuration}`;
+
+        info.appendChild(name);
+        info.appendChild(status);
+
+        const progressBar = document.createElement("div");
+        progressBar.className = "plan-progress-bar group-member-progress";
+
+        const progressFill = document.createElement("div");
+        progressFill.className = "plan-progress-fill";
+        progressFill.style.width = `${Math.min(100, (member.completedDays / planDuration) * 100)}%`;
+
+        progressBar.appendChild(progressFill);
+
+        item.appendChild(info);
+        item.appendChild(progressBar);
+
+        groupMembersList.appendChild(item);
+    });
+}
+
+if (groupBackButton) {
+    groupBackButton.addEventListener("click", () => {
+        groupDetail.classList.add("hidden");
+        groupsList.classList.remove("hidden");
+        currentGroupId = null;
+        currentGroupData = null;
+        loadMyGroups();
+    });
+}
+
+if (copyInviteCodeButton) {
+    copyInviteCodeButton.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(groupInviteCodeDisplay.value);
+            copyInviteCodeButton.textContent = "Copiado!";
+            setTimeout(() => { copyInviteCodeButton.textContent = "Copiar"; }, 1800);
+        } catch (error) {
+            groupInviteCodeDisplay.select();
+        }
+    });
+}
+
+if (leaveGroupButton) {
+    leaveGroupButton.addEventListener("click", async () => {
+        if (!currentGroupId) return;
+
+        const confirmed = confirm("Tem certeza que deseja sair deste grupo?");
+        if (!confirmed) return;
+
+        try {
+            await apiRequest(`/api/groups/${currentGroupId}/leave`, { method: "POST" });
+
+            groupDetail.classList.add("hidden");
+            groupsList.classList.remove("hidden");
+            currentGroupId = null;
+            currentGroupData = null;
+
+            loadMyGroups();
+
+        } catch (error) {
+            alert(error.message || "Não foi possível sair do grupo.");
+        }
+    });
+}
+
+/* --- Reflexões do grupo --- */
+
+async function loadGroupPosts(groupId) {
+    groupPostsList.innerHTML = `<div class="skeleton skeleton-block" style="height: 70px;"></div>`;
+
+    try {
+        const { posts } = await apiRequest(`/api/groups/${groupId}/posts`, { method: "GET" });
+        renderGroupPosts(posts);
+
+    } catch (error) {
+        console.error(error);
+        groupPostsList.innerHTML = `<p style="color:var(--muted);font-size:13px;">Não foi possível carregar as reflexões.</p>`;
+    }
+}
+
+function renderGroupPosts(posts) {
+    groupPostsList.innerHTML = "";
+
+    if (!posts.length) {
+        groupPostsList.innerHTML = `
+            <p style="color:var(--muted);font-size:13px;padding:10px 0;">
+                Nenhuma reflexão compartilhada ainda. Seja o primeiro!
+            </p>
+        `;
+        return;
+    }
+
+    posts.forEach(post => {
+        const item = document.createElement("article");
+        item.className = "group-post-item";
+
+        const header = document.createElement("div");
+        header.className = "group-post-header";
+
+        const author = document.createElement("strong");
+        author.textContent = post.authorName;
+
+        const day = document.createElement("small");
+        day.textContent = `Dia ${post.day}`;
+
+        header.appendChild(author);
+        header.appendChild(day);
+
+        const text = document.createElement("p");
+        text.textContent = post.text;
+
+        const prayButton = document.createElement("button");
+        prayButton.className = `group-pray-button${post.prayedByMe ? " prayed" : ""}`;
+        prayButton.type = "button";
+        prayButton.innerHTML = `🙏 <span>${post.prayedByCount}</span>`;
+
+        prayButton.addEventListener("click", async () => {
+            prayButton.disabled = true;
+            try {
+                const result = await apiRequest(`/api/groups/${currentGroupId}/posts/${post.id}/pray`, {
+                    method: "POST"
+                });
+                prayButton.classList.toggle("prayed", result.prayedByMe);
+                prayButton.innerHTML = `🙏 <span>${result.prayedByCount}</span>`;
+            } catch (error) {
+                console.error(error);
+            } finally {
+                prayButton.disabled = false;
+            }
+        });
+
+        item.appendChild(header);
+        item.appendChild(text);
+        item.appendChild(prayButton);
+
+        groupPostsList.appendChild(item);
+    });
+}
+
+if (shareGroupPostButton) {
+    shareGroupPostButton.addEventListener("click", async () => {
+        if (!currentGroupId || !currentGroupData) return;
+
+        const text = groupPostInput.value.trim();
+
+        if (!text) {
+            alert("Escreva algo antes de compartilhar.");
+            return;
+        }
+
+        // Usa o dia atual do usuário logado dentro do plano do grupo
+        const myMember = currentGroupData.members.find(
+            m => String(m.userId) === String(currentUserId)
+        );
+        const day = myMember ? myMember.currentDay : 1;
+
+        shareGroupPostButton.disabled = true;
+
+        try {
+            await apiRequest(`/api/groups/${currentGroupId}/posts`, {
+                method: "POST",
+                body: JSON.stringify({ day, text })
+            });
+
+            groupPostInput.value = "";
+            loadGroupPosts(currentGroupId);
+
+        } catch (error) {
+            alert(error.message || "Não foi possível compartilhar sua reflexão.");
+        } finally {
+            shareGroupPostButton.disabled = false;
+        }
+    });
+}
+
 
 
 /* =========================================================
@@ -3214,8 +3678,12 @@ const logoutButton = $("logoutButton");
 
 let authMode = "login";
 
+let currentUserId = null;
+
 function updateAccountUI(user) {
     if (!accountLoggedOut || !accountLoggedIn) return;
+
+    currentUserId = user ? user.id : null;
 
     if (user) {
         accountLoggedOut.classList.add("hidden");
