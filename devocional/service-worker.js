@@ -87,3 +87,30 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
+
+
+// service-worker.js — adicionar
+
+// Recebe o push mandado pelo servidor e mostra a notificação,
+// mesmo com o app fechado.
+self.addEventListener("push", (event) => {
+  let data = { title: "Seu momento com Deus 🙏", body: "Seu devocional de hoje está esperando por você." };
+
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (error) {
+      data.body = event.data.text();
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png"
+    })
+  );
+});
+
+// (o listener de notificationclick que vocês já têm continua igual)
