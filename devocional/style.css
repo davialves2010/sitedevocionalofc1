@@ -2581,3 +2581,114 @@ body.dark .navigation {
     gap: 8px;
     margin-top: 12px;
 }
+
+/* =========================================
+   GRUPOS
+========================================= */
+
+.groups-join-card {
+    margin-bottom: 18px;
+}
+
+.group-invite-card {
+    margin-bottom: 20px;
+}
+
+.group-invite-card input {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-align: center;
+}
+
+#groupMembersList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 26px;
+}
+
+.group-member-item {
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.group-member-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+
+.group-member-info strong {
+    font-size: 15px;
+}
+
+.group-member-info small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.group-member-progress {
+    height: 6px;
+}
+
+#groupPostsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.group-post-item {
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.group-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.group-post-header strong {
+    color: var(--green-dark);
+    font-size: 14px;
+}
+
+.group-post-header small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.group-post-item p {
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+}
+
+.group-pray-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 7px 12px;
+    background: var(--background-soft);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.group-pray-button.prayed {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border-color: transparent;
+}
