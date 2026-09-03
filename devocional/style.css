@@ -1619,8 +1619,11 @@ textarea {
     left: 50%;
     transform: translateX(-50%);
     width: min(calc(100% - 30px), 600px);
+
     display: flex;
+    flex-direction: row;
     justify-content: space-around;
+
     padding: 10px;
     border-radius: 25px;
     background: rgba(255, 255, 255, .88);
@@ -1692,17 +1695,17 @@ body.dark .navigation {
     }
 
     .navigation {
-        bottom: 10px;
-        width: calc(100% - 18px);
-    }
+    bottom: 10px;
+    width: calc(100% - 18px);
+}
 
-    .nav-item {
-        padding: 7px 8px;
-    }
+.nav-item {
+    padding: 7px 8px;
+}
 
-    .nav-item small {
-        font-size: 9px;
-    }
+.nav-item small {
+    font-size: 9px;
+}
 
     .secondary-button {
         width: 100%;
