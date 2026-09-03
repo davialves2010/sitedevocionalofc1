@@ -4,7 +4,7 @@
 // e funcionar offline. As chamadas de API (/api/...) e a abibliadigital
 // nunca são interceptadas aqui — sempre buscam dados frescos da rede.
 
-const CACHE_NAME = "devocional-cache-v1";
+const CACHE_NAME = "devocional-cache-v2";
 
 const APP_SHELL = [
   "/",
