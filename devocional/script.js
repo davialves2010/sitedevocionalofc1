@@ -2446,7 +2446,23 @@ if (isIos && !isRunningStandalone() && iosInstallTip) {
 
 
 /* =========================================================
-   LEMBRETE DIÁRIO
+
+/* =========================================================
+   PUSH — HELPER
+========================================================= */
+
+// O navegador espera a chave pública VAPID como Uint8Array, mas o
+// backend manda ela em base64url — essa função faz a conversão.
+function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}
+
+
+/* =========================================================
+   LEMBRETE DIÁRIO (WEB PUSH REAL)
 ========================================================= */
 
 const reminderTimeInput = $("reminderTimeInput");
@@ -2461,10 +2477,9 @@ function updateReminderUI(enabled) {
         reminderToggleButton.classList.add("active");
 
         reminderStatus.textContent =
-            `Lembrete ativado para ${reminderTimeInput.value}. Funciona melhor ` +
-            "com o app instalado e aberto em segundo plano — em alguns " +
-            "celulares (principalmente iPhone), o aviso só aparece quando " +
-            "você reabre o app. No máximo 1 aviso por dia.";
+            `Lembrete ativado para ${reminderTimeInput.value}. Agora funciona mesmo ` +
+            "com o app fechado. No iPhone, precisa estar instalado na Tela de Início " +
+            "(iOS 16.4 ou mais recente).";
 
     } else {
         reminderToggleButton.textContent = "Ativar";
@@ -2473,76 +2488,66 @@ function updateReminderUI(enabled) {
     }
 }
 
-function showReminderNotification() {
-    if (!("Notification" in window) || Notification.permission !== "granted") {
-        return;
+/* --- Inscrição push (registra este aparelho pra receber notificações) --- */
+
+async function subscribeToPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        alert("Seu navegador não é compatível com notificações push.");
+        return false;
     }
 
-    const title = "Seu momento com Deus 🙏";
-    const options = {
-        body: "Seu devocional de hoje está esperando por você.",
-        icon: "/icons/icon-192.png",
-        badge: "/icons/icon-192.png"
-    };
+    if (!isLoggedIn()) {
+        alert("Entre na sua conta pra ativar o lembrete — o push precisa saber pra quem enviar.");
+        return false;
+    }
 
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification(title, options);
+    try {
+        const { publicKey } = await apiRequest("/api/push/vapid-public-key", { method: "GET" });
+
+        const registration = await navigator.serviceWorker.ready;
+
+        let subscription = await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicKey)
+            });
+        }
+
+        await apiRequest("/api/push/subscribe", {
+            method: "POST",
+            body: JSON.stringify({ subscription })
         });
-    } else {
-        new Notification(title, options);
+
+        return true;
+
+    } catch (error) {
+        console.error("Erro ao inscrever para push:", error);
+        return false;
     }
 }
 
-// Em vez de agendar um setTimeout que se re-agenda sozinho (que pode
-// disparar repetidamente se o navegador atrasar/pausar o timer), a
-// gente checa periodicamente: "já passou do horário hoje E ainda não
-// notifiquei hoje?". Isso garante NO MÁXIMO uma notificação por dia,
-// não importa quantas vezes essa checagem rode.
-function checkReminder() {
-    if (!reminderTimeInput) return;
+async function unsubscribeFromPush() {
+    if (!("serviceWorker" in navigator)) return;
 
-    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
-    if (!enabled) return;
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
 
-    if (!("Notification" in window) || Notification.permission !== "granted") {
-        return;
-    }
+        if (subscription) {
+            await subscription.unsubscribe();
+        }
 
-    const savedTime = localStorage.getItem(STORAGE.reminderTime) || "07:00";
-    const [hours, minutes] = savedTime.split(":").map(Number);
-
-    if (Number.isNaN(hours) || Number.isNaN(minutes)) return;
-
-    const now = new Date();
-    const todayKeyValue = dateKey(now);
-
-    const lastShown = localStorage.getItem(STORAGE.reminderLastShown);
-    if (lastShown === todayKeyValue) return; // já mostrado hoje
-
-    const target = new Date();
-    target.setHours(hours, minutes, 0, 0);
-
-    if (now >= target) {
-        showReminderNotification();
-        localStorage.setItem(STORAGE.reminderLastShown, todayKeyValue);
+        if (isLoggedIn()) {
+            await apiRequest("/api/push/unsubscribe", { method: "POST" }).catch(() => {});
+        }
+    } catch (error) {
+        console.error("Erro ao desinscrever do push:", error);
     }
 }
 
-function loadReminderSettings() {
-    if (!reminderTimeInput || !reminderToggleButton) return;
-
-    const savedTime = localStorage.getItem(STORAGE.reminderTime) || "07:00";
-    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
-
-    reminderTimeInput.value = savedTime;
-    updateReminderUI(enabled);
-
-    // Checa assim que o app abre (cobre o caso de já ter passado do
-    // horário) e depois a cada 30 segundos enquanto o app estiver aberto.
-    checkReminder();
-    setInterval(checkReminder, 30000);
-}
+/* --- Botão ativar/desativar --- */
 
 if (reminderToggleButton) {
     reminderToggleButton.addEventListener("click", async () => {
@@ -2550,6 +2555,7 @@ if (reminderToggleButton) {
 
         if (currentlyEnabled) {
             localStorage.setItem(STORAGE.reminderEnabled, "false");
+            await unsubscribeFromPush();
             updateReminderUI(false);
             scheduleCloudSync();
             return;
@@ -2571,14 +2577,18 @@ if (reminderToggleButton) {
             return;
         }
 
+        const subscribed = await subscribeToPush();
+        if (!subscribed) return;
+
         localStorage.setItem(STORAGE.reminderTime, reminderTimeInput.value);
         localStorage.setItem(STORAGE.reminderEnabled, "true");
 
         updateReminderUI(true);
-        checkReminder();
         scheduleCloudSync();
     });
 }
+
+/* --- Trocar o horário --- */
 
 if (reminderTimeInput) {
     reminderTimeInput.addEventListener("change", () => {
@@ -2594,8 +2604,27 @@ if (reminderTimeInput) {
     });
 }
 
-loadReminderSettings();
+/* --- Inicialização --- */
 
+function loadReminderSettings() {
+    if (!reminderTimeInput || !reminderToggleButton) return;
+
+    const savedTime = localStorage.getItem(STORAGE.reminderTime) || "07:00";
+    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+
+    reminderTimeInput.value = savedTime;
+    updateReminderUI(enabled);
+
+    // Se o lembrete estava ativado mas a inscrição push deste aparelho
+    // se perdeu (ex: trocou de navegador, limpou dados), tenta
+    // reinscrever silenciosamente — sem incomodar quem já concedeu a
+    // permissão antes.
+    if (enabled && isLoggedIn() && Notification.permission === "granted") {
+        subscribeToPush();
+    }
+}
+
+loadReminderSettings();
 
 /* =========================================================
    COMPARTILHAR COMO IMAGEM
@@ -3095,9 +3124,17 @@ function applyCloudDataSnapshot(data) {
     loadTheme();
 
     if (reminderTimeInput) {
-        reminderTimeInput.value = localStorage.getItem(STORAGE.reminderTime) || "07:00";
-        updateReminderUI(localStorage.getItem(STORAGE.reminderEnabled) === "true");
+    reminderTimeInput.value = localStorage.getItem(STORAGE.reminderTime) || "07:00";
+    const enabled = localStorage.getItem(STORAGE.reminderEnabled) === "true";
+    updateReminderUI(enabled);
+
+    // Este aparelho ainda não tem inscrição push própria — se o
+    // lembrete veio ligado da nuvem e já temos permissão concedida
+    // aqui, inscreve este aparelho também.
+    if (enabled && Notification.permission === "granted") {
+        subscribeToPush();
     }
+}
 }
 
 function isCloudDataEmpty(data) {
