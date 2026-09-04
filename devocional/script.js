@@ -2542,10 +2542,11 @@ if (joinGroupButton) {
             });
 
             joinGroupCodeInput.value = "";
-            joinGroupStatus.textContent = "";
+joinGroupStatus.textContent = "";
 
-            await loadMyGroups();
-            openGroupDetail(group.id);
+await loadMyGroups();
+renderHomeGroupShortcut();   // <-- adicionar
+openGroupDetail(group.id);
 
         } catch (error) {
             joinGroupStatus.textContent = error.message || "Não foi possível entrar no grupo.";
@@ -2664,6 +2665,7 @@ if (leaveGroupButton) {
             currentGroupData = null;
 
             loadMyGroups();
+renderHomeGroupShortcut();   // <-- adicionar
 
         } catch (error) {
             alert(error.message || "Não foi possível sair do grupo.");
@@ -2781,6 +2783,69 @@ if (shareGroupPostButton) {
     });
 }
 
+/* --- Atalho na Home --- */
+
+const groupShortcutCard = $("groupShortcutCard");
+const groupShortcutTitle = $("groupShortcutTitle");
+const groupShortcutDescription = $("groupShortcutDescription");
+const groupShortcutButton = $("groupShortcutButton");
+
+let featuredGroupId = null;
+
+async function renderHomeGroupShortcut() {
+    if (!groupShortcutCard) return;
+
+    if (!isLoggedIn()) {
+        groupShortcutCard.classList.add("hidden");
+        featuredGroupId = null;
+        return;
+    }
+
+    try {
+        const { groups } = await apiRequest("/api/groups", { method: "GET" });
+
+        if (!groups.length) {
+            groupShortcutCard.classList.add("hidden");
+            featuredGroupId = null;
+            return;
+        }
+
+        const featured = groups[0];
+        featuredGroupId = featured.id;
+
+        const detail = await apiRequest(`/api/groups/${featured.id}`, { method: "GET" });
+        const myMember = detail.members.find(m => String(m.userId) === String(currentUserId));
+
+        groupShortcutTitle.textContent = featured.name;
+
+        if (myMember) {
+            groupShortcutDescription.textContent = myMember.isFinished
+                ? `Plano concluído · ${detail.planDuration}/${detail.planDuration} dias · ${featured.memberCount} pessoas`
+                : `Você está no dia ${myMember.currentDay} de ${detail.planDuration} · ${featured.memberCount} pessoas`;
+        } else {
+            groupShortcutDescription.textContent = `${featured.memberCount} pessoas nesse grupo`;
+        }
+
+        groupShortcutCard.classList.remove("hidden");
+
+    } catch (error) {
+        console.error("Erro ao carregar atalho de grupo:", error);
+        groupShortcutCard.classList.add("hidden");
+        featuredGroupId = null;
+    }
+}
+
+if (groupShortcutButton) {
+    groupShortcutButton.addEventListener("click", () => {
+        document.querySelector('.nav-item[data-screen="pathScreen"]').click();
+        document.querySelector('.paths-tab[data-path="groups"]').click();
+
+        if (featuredGroupId) {
+            openGroupDetail(featuredGroupId);
+        }
+    });
+}
+
 
 
 /* =========================================================
@@ -2832,7 +2897,8 @@ renderReflections();
 renderCalendar();
 renderPlansList();
 renderHomePlanShortcut();
-renderHighlightsList(); // <-- NOVO
+renderHomeGroupShortcut();   // <-- adicionar
+renderHighlightsList();
 updateCompleteButton();
 loadVerse();
 loadBooks();
@@ -3616,19 +3682,18 @@ async function syncAfterLogin() {
         const { data } = await apiRequest("/api/data", { method: "GET" });
 
         if (isCloudDataEmpty(data)) {
-            // Conta nova (ou ainda vazia na nuvem) — envia o que já
-            // existe localmente pra "semear" a conta.
             await apiRequest("/api/data", {
                 method: "PUT",
                 body: JSON.stringify(collectLocalDataSnapshot())
             });
         } else {
-            // Já existem dados salvos na nuvem — eles prevalecem.
             applyCloudDataSnapshot(data);
         }
     } catch (error) {
         console.error("Erro ao sincronizar após login:", error);
     }
+
+    renderHomeGroupShortcut();   // <-- adicionar
 }
 
 let cloudSyncTimeoutId = null;
