@@ -19,15 +19,22 @@ const GROQ_MODEL = "openai/gpt-oss-120b";
 const JOAO_21_DIAS = {
   duration: 21,
   type: "chapter",
+  bookLabel: "Evangelho de João",
   getReference: (day) => ({ book: "jo", chapter: day })
 };
 
-// 30 versículos curados sobre ansiedade, paz e confiança em Deus.
+const PROVERBIOS_31_DIAS = {
+  duration: 31,
+  type: "chapter",
+  bookLabel: "livro de Provérbios",
+  getReference: (day) => ({ book: "pv", chapter: day })
+};
+
 const ANSIEDADE_30_DIAS = {
   duration: 30,
   type: "verse",
-  references: [
-    { book: "sl", chapter: 23, verse: 1 },
+  references: [ 
+  { book: "sl", chapter: 23, verse: 1 },
     { book: "fp", chapter: 4, verse: 6 },
     { book: "mt", chapter: 6, verse: 34 },
     { book: "is", chapter: 41, verse: 10 },
@@ -56,13 +63,54 @@ const ANSIEDADE_30_DIAS = {
     { book: "dt", chapter: 31, verse: 6 },
     { book: "sl", chapter: 143, verse: 8 },
     { book: "pv", chapter: 12, verse: 25 },
-    { book: "nm", chapter: 6, verse: 24 }
+    { book: "nm", chapter: 6, verse: 24 }  
+  ]
+};
+
+const FRUTOS_9_DIAS = {
+  duration: 9,
+  type: "verse",
+  references: [
+    { book: "1co", chapter: 13, verse: 4 },   // Amor
+    { book: "sl",  chapter: 16, verse: 11 },  // Alegria
+    { book: "fp",  chapter: 4,  verse: 7 },   // Paz
+    { book: "tg",  chapter: 1,  verse: 4 },   // Paciência
+    { book: "ef",  chapter: 4,  verse: 32 },  // Amabilidade
+    { book: "sl",  chapter: 23, verse: 6 },   // Bondade
+    { book: "lm",  chapter: 3,  verse: 23 },  // Fidelidade
+    { book: "mt",  chapter: 11, verse: 29 },  // Mansidão
+    { book: "2tm", chapter: 1,  verse: 7 }    // Domínio próprio
+  ]
+};
+
+const LOUVOR_14_DIAS = {
+  duration: 14,
+  type: "verse",
+  topicLabel: "louvor e adoração através dos Salmos",
+  references: [
+    { book: "sl", chapter: 100, verse: 1 },
+    { book: "sl", chapter: 150, verse: 6 },
+    { book: "sl", chapter: 34,  verse: 1 },
+    { book: "sl", chapter: 103, verse: 1 },
+    { book: "sl", chapter: 95,  verse: 1 },
+    { book: "sl", chapter: 145, verse: 3 },
+    { book: "sl", chapter: 8,   verse: 1 },
+    { book: "sl", chapter: 92,  verse: 1 },
+    { book: "sl", chapter: 63,  verse: 3 },
+    { book: "sl", chapter: 96,  verse: 1 },
+    { book: "sl", chapter: 47,  verse: 1 },
+    { book: "sl", chapter: 33,  verse: 1 },
+    { book: "sl", chapter: 138, verse: 1 },
+    { book: "sl", chapter: 149, verse: 1 }
   ]
 };
 
 const PLANS_DATA = {
   joao21: JOAO_21_DIAS,
-  ansiedade30: ANSIEDADE_30_DIAS
+  ansiedade30: ANSIEDADE_30_DIAS,
+  proverbios31: PROVERBIOS_31_DIAS,
+  frutos9: FRUTOS_9_DIAS,
+  louvor14: LOUVOR_14_DIAS
 };
 
 module.exports = async function handler(req, res) {
@@ -103,8 +151,8 @@ module.exports = async function handler(req, res) {
       reference = `${passageData.book.name} ${passageData.chapter.number}`;
 
       promptContext =
-        `Hoje é o dia ${day} de um plano de leitura de ${plan.duration} dias pelo ` +
-        `Evangelho de João, lendo um capítulo por dia. A leitura de hoje é ${reference}.`;
+  `Hoje é o dia ${day} de um plano de ${plan.duration} dias sobre ${plan.topicLabel}. ` +
+  `O versículo de hoje é "${passageData.text}" (${reference}).`;
 
       result.verses = passageData.verses.map((verse) => ({
         number: verse.number,
