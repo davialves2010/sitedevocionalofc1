@@ -154,6 +154,36 @@ const PLANS = [
         description:
             "Um mês de versículos e reflexões para entregar suas preocupações " +
             "a Deus e encontrar descanso."
+    },
+    {
+        id: "proverbios31",
+        title: "Provérbios",
+        subtitle: "31 dias de sabedoria",
+        icon: "📖",
+        duration: 31,
+        description:
+            "Um capítulo de Provérbios por dia — sabedoria prática para suas " +
+            "decisões, relacionamentos e caráter."
+    },
+    {
+        id: "frutos9",
+        title: "Frutos do Espírito",
+        subtitle: "9 dias, um fruto por dia",
+        icon: "🍇",
+        duration: 9,
+        description:
+            "Uma jornada por Gálatas 5:22-23: amor, alegria, paz, paciência, " +
+            "amabilidade, bondade, fidelidade, mansidão e domínio próprio."
+    },
+    {
+        id: "louvor14",
+        title: "Salmos de Louvor",
+        subtitle: "14 dias de adoração",
+        icon: "🎶",
+        duration: 14,
+        description:
+            "Catorze salmos que convidam você a louvar a Deus com alegria, " +
+            "gratidão e reverência."
     }
 ];
 
