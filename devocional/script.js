@@ -131,7 +131,6 @@ const STORAGE = {
 
 
 /* =========================================================
-  /* =========================================================
    PLANOS DE LEITURA — DADOS
    (substitui o array PLANS atual em script.js — versão final,
    com TODOS os planos: os 2 originais + os 24 criados depois)
