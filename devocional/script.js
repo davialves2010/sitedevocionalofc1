@@ -131,10 +131,17 @@ const STORAGE = {
 
 
 /* =========================================================
+  /* =========================================================
    PLANOS DE LEITURA — DADOS
+   (substitui o array PLANS atual em script.js — versão final,
+   com TODOS os planos: os 2 originais + os 24 criados depois)
 ========================================================= */
 
 const PLANS = [
+
+    // ---------------------------------------------------
+    // JÁ EXISTENTES DESDE O INÍCIO
+    // ---------------------------------------------------
     {
         id: "joao21",
         title: "Evangelho de João",
@@ -155,6 +162,10 @@ const PLANS = [
             "Um mês de versículos e reflexões para entregar suas preocupações " +
             "a Deus e encontrar descanso."
     },
+
+    // ---------------------------------------------------
+    // PRIMEIRO LOTE DE SUGESTÕES
+    // ---------------------------------------------------
     {
         id: "proverbios31",
         title: "Provérbios",
@@ -184,8 +195,244 @@ const PLANS = [
         description:
             "Catorze salmos que convidam você a louvar a Deus com alegria, " +
             "gratidão e reverência."
+    },
+
+    // ---------------------------------------------------
+    // CURTOS (5–7 DIAS)
+    // ---------------------------------------------------
+    {
+        id: "dormir7",
+        title: "Antes de dormir",
+        subtitle: "7 noites de descanso",
+        icon: "🌙",
+        duration: 7,
+        description:
+            "Versículos curtos para acalmar o coração e entregar o dia a Deus " +
+            "antes de fechar os olhos."
+    },
+    {
+        id: "recomeco7",
+        title: "Recomeço",
+        subtitle: "7 dias de graça renovada",
+        icon: "🌱",
+        duration: 7,
+        description:
+            "Para quando você precisa virar a página: um plano curto sobre a " +
+            "misericórdia de Deus que se renova a cada manhã."
+    },
+    {
+        id: "decisao5",
+        title: "Antes de uma decisão",
+        subtitle: "5 dias de sabedoria",
+        icon: "🧭",
+        duration: 5,
+        description:
+            "Um plano rápido para buscar discernimento e paz antes de tomar " +
+            "uma decisão importante."
+    },
+
+    // ---------------------------------------------------
+    // EMOCIONAIS (10–14 DIAS)
+    // ---------------------------------------------------
+    {
+        id: "luto10",
+        title: "Quando o luto pesa",
+        subtitle: "10 dias de conforto",
+        icon: "🕯️",
+        duration: 10,
+        description:
+            "Palavras de consolo para acompanhar você nos dias difíceis depois " +
+            "de uma perda."
+    },
+    {
+        id: "solidao10",
+        title: "Solidão",
+        subtitle: "10 dias de companhia",
+        icon: "🤍",
+        duration: 10,
+        description:
+            "Versículos que lembram: mesmo nos dias mais sozinhos, Deus nunca " +
+            "te deixa."
+    },
+    {
+        id: "raivaPerdao10",
+        title: "Raiva e perdão",
+        subtitle: "10 dias para soltar o peso",
+        icon: "🕊️",
+        duration: 10,
+        description:
+            "Como lidar com a raiva sem guardar mágoa, e dar os primeiros " +
+            "passos rumo ao perdão."
+    },
+    {
+        id: "autoestima14",
+        title: "Identidade em Deus",
+        subtitle: "14 dias de valor próprio",
+        icon: "✨",
+        duration: 14,
+        description:
+            "Uma jornada para lembrar quem você é aos olhos de Deus — além das " +
+            "comparações e da autocrítica."
+    },
+
+    // ---------------------------------------------------
+    // RELACIONAIS (10–14 DIAS)
+    // ---------------------------------------------------
+    {
+        id: "casamento14",
+        title: "Casamento",
+        subtitle: "14 dias de amor e cuidado",
+        icon: "💍",
+        duration: 14,
+        description:
+            "Sabedoria bíblica sobre amor, paciência e comunicação para " +
+            "fortalecer seu casamento."
+    },
+    {
+        id: "paisFilhos14",
+        title: "Pais e filhos",
+        subtitle: "14 dias de herança espiritual",
+        icon: "👨‍👩‍👧",
+        duration: 14,
+        description:
+            "Reflexões sobre criação, paciência e o legado de fé que passamos " +
+            "para os filhos."
+    },
+    {
+        id: "perdoando10",
+        title: "Perdoando quem me feriu",
+        subtitle: "10 dias de libertação",
+        icon: "🤝",
+        duration: 10,
+        description:
+            "Um caminho, passo a passo, para perdoar alguém que te machucou — " +
+            "sem minimizar a dor."
+    },
+
+    // ---------------------------------------------------
+    // LIVROS BÍBLICOS
+    // ---------------------------------------------------
+    {
+        id: "genesis50",
+        title: "Gênesis",
+        subtitle: "50 dias pelas origens",
+        icon: "🌍",
+        duration: 50,
+        description:
+            "Percorra o livro de Gênesis, um capítulo por dia, e conheça as " +
+            "origens da fé, da humanidade e das promessas de Deus."
+    },
+    {
+        id: "tiago5",
+        title: "Tiago",
+        subtitle: "5 dias de fé prática",
+        icon: "🔥",
+        duration: 5,
+        description:
+            "Uma carta curta e direta sobre viver a fé no dia a dia — ótima " +
+            "porta de entrada para ler um livro bíblico inteiro."
+    },
+    {
+        id: "salmosEssenciais30",
+        title: "Salmos essenciais",
+        subtitle: "30 dias de louvor e lamento",
+        icon: "📯",
+        duration: 30,
+        description:
+            "Uma curadoria dos salmos mais conhecidos e amados, para orar e " +
+            "louvar com as palavras que a Bíblia já nos deu."
+    },
+    {
+        id: "amor7",
+        title: "O Amor",
+        subtitle: "7 dias em 1 Coríntios 13",
+        icon: "❤️",
+        duration: 7,
+        description:
+            "Um mergulho no capítulo mais conhecido sobre o amor — o que ele " +
+            "é, o que não é, e por que ele é o maior de todos."
+    },
+
+    // ---------------------------------------------------
+    // CRESCIMENTO ESPIRITUAL (10–14 DIAS)
+    // ---------------------------------------------------
+    {
+        id: "oracao14",
+        title: "Oração",
+        subtitle: "14 dias para orar melhor",
+        icon: "🙏",
+        duration: 14,
+        description:
+            "Aprenda com exemplos bíblicos de oração e desenvolva o hábito de " +
+            "conversar com Deus todos os dias."
+    },
+    {
+        id: "criseFinanceira14",
+        title: "Fé em tempos de aperto",
+        subtitle: "14 dias sobre provisão",
+        icon: "🌾",
+        duration: 14,
+        description:
+            "Versículos sobre confiança, generosidade e provisão para " +
+            "atravessar momentos financeiros difíceis."
+    },
+    {
+        id: "trabalhoProposito14",
+        title: "Trabalho e propósito",
+        subtitle: "14 dias de excelência",
+        icon: "💼",
+        duration: 14,
+        description:
+            "Reflexões sobre como viver o chamado de Deus também na rotina de " +
+            "trabalho, com excelência e sentido."
+    },
+    {
+        id: "ansiedadeFuturo10",
+        title: "Ansiedade sobre o futuro",
+        subtitle: "10 dias de confiança",
+        icon: "🌤️",
+        duration: 10,
+        description:
+            "Para os dias em que o amanhã parece incerto demais: versículos " +
+            "sobre entregar o futuro a Deus."
+    },
+
+    // ---------------------------------------------------
+    // SAZONAIS
+    // ---------------------------------------------------
+    {
+        id: "advento24",
+        title: "Advento",
+        subtitle: "24 dias até o Natal",
+        icon: "⭐",
+        duration: 24,
+        description:
+            "Da promessa profética ao nascimento de Jesus — acompanhe a " +
+            "contagem regressiva para o Natal com a Palavra."
+    },
+    {
+        id: "pascoa7",
+        title: "Semana Santa",
+        subtitle: "7 dias até a Páscoa",
+        icon: "✝️",
+        duration: 7,
+        description:
+            "De Domingo de Ramos à Ressurreição: reviva os últimos dias de " +
+            "Jesus antes da Páscoa."
+    },
+    {
+        id: "anoNovo7",
+        title: "Ano Novo",
+        subtitle: "7 dias de propósito",
+        icon: "🎉",
+        duration: 7,
+        description:
+            "Comece o ano com intenção: recomeço, propósito e expectativa para " +
+            "os próximos 365 dias."
     }
+
 ];
+
 
 
 /* =========================================================
